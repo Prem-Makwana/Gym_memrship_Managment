@@ -1,0 +1,44 @@
+@model TrainerCreateVm
+@{
+  ViewData["Title"] = "Edit Trainer";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Edit Trainer</h1></div>
+  <a href="/Trainer" class="btn-outline-glass"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<form asp-action="Edit" asp-controller="Trainer" asp-route-id="@Context.Request.RouteValues["id"]" method="post" class="form-glass">
+  @Html.AntiForgeryToken()
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <label class="form-label-dark">Full Name *</label>
+      <input asp-for="FullName" class="form-control-dark" style="width:100%" required />
+    </div>
+    <div>
+      <label class="form-label-dark">Phone *</label>
+      <input asp-for="Phone" class="form-control-dark" style="width:100%" required />
+    </div>
+    <div>
+      <label class="form-label-dark">Email</label>
+      <input asp-for="Email" type="email" class="form-control-dark" style="width:100%" />
+    </div>
+    <div>
+      <label class="form-label-dark">Specialization</label>
+      <input asp-for="Specialization" class="form-control-dark" style="width:100%" />
+    </div>
+    <div>
+      <label class="form-label-dark">Experience (Years)</label>
+      <input asp-for="ExperienceYears" type="number" class="form-control-dark" style="width:100%" />
+    </div>
+    <div>
+      <label class="form-label-dark">Joining Date</label>
+      <input asp-for="JoiningDate" type="date" class="form-control-dark" style="width:100%" />
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
+    <a href="/Trainer" class="btn-outline-glass">Cancel</a>
+    <button type="submit" class="btn-gradient-blue"><i class="bi bi-save"></i> Save</button>
+  </div>
+</form>

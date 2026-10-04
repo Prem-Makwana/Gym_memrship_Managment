@@ -1,0 +1,80 @@
+﻿@model Gym_memrship_Managment.ViewModels.NotificationCreateVm
+@{
+    ViewData["Title"] = "Send Notification";
+}
+
+<div class="container-fluid p-4">
+    <div class="glass-card p-8 sm:p-10 border border-white/5 shadow-[0_0_50px_rgba(0,229,255,0.03)] rounded-2xl overflow-hidden backdrop-blur-xl glass-card/60">
+        <h2 class="text-3xl font-oswald font-bold mb-6 bg-gradient-to-r from-gym-blue via-[#8B5CF6] to-gym-orange text-transparent bg-clip-text drop-shadow-sm">
+            <i class="bi bi-broadcast text-gym-blue mr-2"></i> Broadcast Notification
+        </h2>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Title -->
+                <div class="form-group relative">
+                    <label asp-for="Title" class="text-[10px] font-bold text-gym-gray uppercase tracking-[0.15em] mb-2 block">Notification Title</label>
+                    <input asp-for="Title" class="w-full bg-black/40 border  rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gym-blue focus:ring-1 focus:ring-gym-blue transition-all" placeholder="Enter title" />
+                    <span asp-validation-for="Title" class="text-gym-red text-xs mt-1 block"></span>
+                </div>
+                
+                <!-- Type -->
+                <div class="form-group relative">
+                    <label asp-for="Type" class="text-[10px] font-bold text-gym-gray uppercase tracking-[0.15em] mb-2 block">Notification Type</label>
+                    <select asp-for="Type" asp-items="Html.GetEnumSelectList<Gym_memrship_Managment.Models.NotificationType>()" class="w-full bg-black/40 border  rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gym-blue focus:ring-1 focus:ring-gym-blue transition-all">
+                    </select>
+                </div>
+                
+                <!-- Audience -->
+                <div class="form-group relative md:col-span-2">
+                    <label asp-for="TargetAudience" class="text-[10px] font-bold text-gym-gray uppercase tracking-[0.15em] mb-2 block">Target Audience</label>
+                    <select asp-for="TargetAudience" id="TargetAudience" class="w-full bg-black/40 border  rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gym-blue focus:ring-1 focus:ring-gym-blue transition-all">
+                        <option value="All">All Users</option>
+                        <option value="Staff">All Staff / Employees</option>
+                        <option value="Members">All Members</option>
+                        <option value="Specific">Specific User</option>
+                    </select>
+                </div>
+                
+                <!-- Specific User -->
+                <div class="form-group relative md:col-span-2" id="SpecificUserBlock" style="display:none;">
+                    <label asp-for="SpecificUserId" class="text-[10px] font-bold text-gym-gray uppercase tracking-[0.15em] mb-2 block">Select User</label>
+                    <select asp-for="SpecificUserId" asp-items="ViewBag.Users" class="w-full bg-black/40 border  rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gym-blue focus:ring-1 focus:ring-gym-blue transition-all">
+                        <option value="">-- Select a User --</option>
+                    </select>
+                </div>
+
+                <!-- Message -->
+                <div class="form-group relative md:col-span-2">
+                    <label asp-for="Message" class="text-[10px] font-bold text-gym-gray uppercase tracking-[0.15em] mb-2 block">Message Content</label>
+                    <textarea asp-for="Message" rows="5" class="w-full bg-black/40 border  rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gym-blue focus:ring-1 focus:ring-gym-blue transition-all" placeholder="Enter notification message here..."></textarea>
+                    <span asp-validation-for="Message" class="text-gym-red text-xs mt-1 block"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="group relative px-6 py-3 rounded-xl font-bold tracking-widest text-sm overflow-hidden bg-gym-blue/10 border border-gym-blue/30 text-gym-blue hover:text-white transition-colors">
+                <div class="absolute inset-0 w-full h-full bg-gym-blue -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                <span class="relative z-10 flex items-center gap-2"><i class="bi bi-send-fill"></i> Send Notification</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('TargetAudience').addEventListener('change', function() {
+            var val = this.value;
+            var block = document.getElementById('SpecificUserBlock');
+            if (val === 'Specific') {
+                block.style.display = 'block';
+            } else {
+                block.style.display = 'none';
+            }
+        });
+    </script>
+}
+

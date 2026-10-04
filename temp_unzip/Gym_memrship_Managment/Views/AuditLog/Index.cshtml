@@ -1,0 +1,54 @@
+@model IEnumerable<Gym_memrship_Managment.Models.AuditLog>
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+<div class="card glassmorphism">
+    <div class="card-header border-0 bg-transparent pb-0">
+        <h3 class="text-neon-purple fw-bold"><i class="bi bi-shield-lock me-2"></i>Audit Logs</h3>
+        <p class="text-light-50">System activity tracking</p>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-3">
+                <input type="date" name="from" class="form-control glass-input" value="@Context.Request.Query["from"]" />
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="to" class="form-control glass-input" value="@Context.Request.Query["to"]" />
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="entityName" class="form-control glass-input" placeholder="Entity Name..." value="@Context.Request.Query["entityName"]" />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-neon w-100"><i class="bi bi-search"></i> Filter</button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table text-light">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>IP Address</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model)
+                    {
+                        <tr>
+                            <td>@log.Timestamp.ToString("g")</td>
+                            <td>@(log.UserId ?? "System")</td>
+                            <td><span class="badge bg-secondary">@log.Action</span></td>
+                            <td>@log.EntityName (#@log.EntityId)</td>
+                            <td>@log.IPAddress</td>
+                            <td>@log.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

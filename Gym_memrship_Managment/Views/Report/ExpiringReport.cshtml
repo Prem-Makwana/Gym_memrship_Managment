@@ -1,0 +1,79 @@
+﻿@model IEnumerable<Gym_memrship_Managment.Interfaces.ExpiringMembershipItem>
+@{
+    ViewData["Title"] = "Expiring Memberships Report";
+    Layout = "_Layout";
+    var days = ViewBag.Days as int? ?? 30;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Expiring Memberships Report</h1>
+        <p class="page-subtitle">Showing memberships expiring in the next @days days</p>
+    </div>
+    <div class="flex gap-2">
+        <form method="get" action="/Report/Expiring">
+            <input type="hidden" name="days" value="@days" />
+            <button type="submit" name="export" value="true" class="btn-outline-glass">
+                <i class="bi bi-download"></i> Export CSV
+            </button>
+        </form>
+        <a href="/Report" class="btn-outline-glass">Back to Reports</a>
+    </div>
+</div>
+
+<div class="glass-card p-0">
+    <div class="table-responsive">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Phone</th>
+                    <th>Plan</th>
+                    <th>Expiry Date</th>
+                    <th>Days Remaining</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-medium text-white">@item.MemberName</td>
+                        <td>@item.Phone</td>
+                        <td>@item.PlanName</td>
+                        <td>@item.ExpiryDate.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            @if (item.DaysRemaining < 0)
+                            {
+                                <span class="text-[#FF006E] font-semibold">Expired (@Math.Abs(item.DaysRemaining) days ago)</span>
+                            }
+                            else if (item.DaysRemaining <= 3)
+                            {
+                                <span class="text-[#FF006E] font-semibold">@item.DaysRemaining days</span>
+                            }
+                            else if (item.DaysRemaining <= 7)
+                            {
+                                <span class="text-[#FFB347] font-semibold">@item.DaysRemaining days</span>
+                            }
+                            else
+                            {
+                                <span class="text-[#00FF88]">@item.DaysRemaining days</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="/Membership/Renew/@item.MemberId" class="btn-gradient-blue px-3 py-1 text-xs">Renew</a>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-[#9994AA] p-[30px]">
+                            No memberships expiring in this timeframe.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

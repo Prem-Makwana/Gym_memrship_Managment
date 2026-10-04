@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "QR Code Scanner";
+}
+<div class="container mx-auto px-4 py-8 max-w-3xl text-center">
+    <h2 class="text-3xl font-oswald text-white uppercase tracking-wider mb-8">Gym Access Scanner</h2>
+    <div id="reader" class="mx-auto w-full max-w-md border-4 border-gym-blue rounded-xl overflow-hidden shadow-[0_0_30px_rgba(0,229,255,0.2)] bg-black"></div>
+    <div id="result" class="mt-6 text-xl text-gym-green font-bold drop-shadow-[0_0_10px_rgba(57,255,20,0.8)] h-12"></div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+            html5QrcodeScanner.render(function(decodedText, decodedResult) {
+                // Prevent multiple rapid scans
+                if(window.isScanning) return;
+                window.isScanning = true;
+                
+                document.getElementById('result').innerText = "Processing...";
+                
+                fetch('/Attendance/LogQrCheckIn', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: 'qrHash=' + encodeURIComponent(decodedText)
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success) {
+                        document.getElementById('result').innerHTML = <i class="bi bi-check-circle-fill"></i> Welcome,  + data.memberName;
+                        document.getElementById('result').className = "mt-6 text-xl text-gym-green font-bold drop-shadow-[0_0_10px_rgba(57,255,20,0.8)] h-12";
+                    } else {
+                        document.getElementById('result').innerHTML = <i class="bi bi-x-octagon-fill"></i> Access Denied;
+                        document.getElementById('result').className = "mt-6 text-xl text-gym-red font-bold drop-shadow-[0_0_10px_rgba(255,0,60,0.8)] h-12";
+                    }
+                    setTimeout(() => { window.isScanning = false; document.getElementById('result').innerText = ""; }, 3000);
+                }).catch(e => {
+                    window.isScanning = false;
+                });
+            }, function(error) { /* Background scan errors, ignore */ });
+        });
+    </script>
+}

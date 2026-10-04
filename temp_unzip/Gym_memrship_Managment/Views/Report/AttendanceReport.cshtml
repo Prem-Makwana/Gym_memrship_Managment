@@ -1,0 +1,79 @@
+@model IEnumerable<Gym_memrship_Managment.Interfaces.AttendanceReportItem>
+@{
+    ViewData["Title"] = "Attendance Report";
+    Layout = "_Layout";
+    var fromDate = ViewBag.From as DateTime?;
+    var toDate = ViewBag.To as DateTime?;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Attendance Report</h1>
+        <p class="page-subtitle">
+            Showing results @(fromDate.HasValue ? $"from {fromDate.Value:MMM dd, yyyy}" : "") 
+            @(toDate.HasValue ? $"to {toDate.Value:MMM dd, yyyy}" : "")
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <form method="get" action="/Report/Attendance">
+            <input type="hidden" name="from" value="@fromDate?.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="to" value="@toDate?.ToString("yyyy-MM-dd")" />
+            <button type="submit" name="export" value="true" class="btn-outline-glass">
+                <i class="bi bi-download"></i> Export CSV
+            </button>
+        </form>
+        <a href="/Report" class="btn-outline-glass">Back to Reports</a>
+    </div>
+</div>
+
+<div class="glass-card p-0">
+    <div class="table-responsive">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Date</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Duration</th>
+                    <th>Batch</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="font-medium text-white">@item.MemberName</div>
+                            <div class="text-[12px] text-[#9994AA]">@item.MembershipNumber</div>
+                        </td>
+                        <td>@item.Date.ToString("MMM dd, yyyy")</td>
+                        <td>@item.CheckInTime.ToString("HH:mm")</td>
+                        <td>@(item.CheckOutTime?.ToString("HH:mm") ?? "-")</td>
+                        <td>@(item.DurationMinutes.HasValue ? $"{item.DurationMinutes} min" : "-")</td>
+                        <td>@(string.IsNullOrEmpty(item.BatchName) ? "-" : item.BatchName)</td>
+                        <td>
+                            @if (item.Status == "CheckedIn")
+                            {
+                                <span class="badge-status badge-active">@item.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge-status badge-inactive">@item.Status</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-[#9994AA] p-[30px]">
+                            No data found for the selected criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

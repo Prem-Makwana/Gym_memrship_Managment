@@ -1,0 +1,71 @@
+﻿@model List<Membership>
+@{
+  ViewData["Title"] = "Memberships";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Memberships</h1>
+  </div>
+  <div style="display:flex;gap:8px">
+    @foreach (var s in new[] { "Active", "ExpiringSoon", "Expired", "Suspended", "Cancelled" })
+    {
+      <a href="/Membership?status=@s" class="btn-outline-glass" style="font-size:12px;padding:6px 12px;@(ViewBag.StatusFilter == s ? "background:rgba(0,212,255,0.1);color:#00D4FF;border-color:rgba(0,212,255,0.3)" : "")">@s</a>
+    }
+    <a href="/Membership" class="btn-outline-glass" style="font-size:12px;padding:6px 12px">All</a>
+  </div>
+</div>
+
+<div class="glass-card" style="padding:0;overflow:hidden">
+  <table class="glass-table">
+    <thead>
+      <tr><th>Member</th><th>Plan</th><th>Start</th><th>End</th><th>Days Left</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      @if (!Model.Any())
+      {
+        <tr><td colspan="8" style="text-align:center;padding:40px;color:#5c5875">No memberships found</td></tr>
+      }
+      @foreach (var m in Model)
+      {
+        var status = m.ComputedStatus;
+        var bc = status == MembershipStatus.Active ? "badge-active"
+            : status == MembershipStatus.ExpiringSoon ? "badge-expiring"
+            : status == MembershipStatus.Expired ? "badge-expired"
+            : status == MembershipStatus.Suspended ? "badge-suspended"
+            : "badge-cancelled";
+        <tr>
+          <td>
+            <div style="font-weight:500">@m.Member?.FullName</div>
+            <div style="font-size:11px;color:#5c5875">@m.Member?.MembershipNumber</div>
+          </td>
+          <td>@m.Plan?.PlanName</td>
+          <td style="color:#9994AA;font-size:12px">@m.StartDate.ToString("MMM dd, yyyy")</td>
+          <td style="color:#9994AA;font-size:12px">@m.EndDate.ToString("MMM dd, yyyy")</td>
+          <td style="color:@(m.DaysRemaining < 7 ? "#FFB347" : "#9994AA")">@m.DaysRemaining</td>
+          <td style="color:#00FF88;font-weight:600">₹@m.FinalAmount.ToString("N2")</td>
+          <td><span class="badge-status @bc">@status</span></td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <a href="/Membership/Details/@m.MembershipId" class="btn-outline-glass" style="padding:4px 8px;font-size:11px"><i class="bi bi-eye"></i></a>
+              <a href="/Membership/Renew/@m.MembershipId" class="btn-outline-glass" style="padding:4px 8px;font-size:11px"><i class="bi bi-arrow-repeat"></i></a>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+  <div style="display:flex;justify-content:center;margin-top:16px">
+    <div class="pagination-glass">
+      @for (var i = 1; i <= (int)ViewBag.TotalPages; i++)
+      {
+        <a href="?status=@ViewBag.StatusFilter&page=@i" class="page-btn @(i == (int)ViewBag.CurrentPage ? "active" : "")">@i</a>
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,110 @@
+﻿@model Gym_memrship_Managment.ViewModels.LoginVm
+@{
+  ViewData["Title"] = "Access Terminal";
+  Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center p-4 relative z-10">
+  <!-- Background Ambient Glow Specific to Login -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-[20%] left-[20%] w-[300px] h-[300px] bg-gym-blue/20 rounded-full blur-[120px] animate-pulse"></div>
+    <div class="absolute bottom-[20%] right-[20%] w-[300px] h-[300px] bg-gym-orange/10 rounded-full blur-[100px] animate-[pulse_4s_ease-in-out_infinite]" style="animation-delay: 2s"></div>
+  </div>
+
+  <div class="glass-card w-full max-w-[420px] relative z-10 p-8 sm:p-10 border border-white/5 shadow-[0_0_50px_rgba(0,229,255,0.03)] rounded-2xl overflow-hidden backdrop-blur-xl bg-[#0A0A0A]/60">
+    <!-- Shine overlay -->
+    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent pointer-events-none"></div>
+
+    <!-- Logo -->
+    <div class="text-center mb-10 relative">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-gym-blue/20 to-gym-blue/5 border border-gym-blue/20 mb-4 shadow-[0_0_20px_rgba(0,229,255,0.15)]">
+        <i class="bi bi-lightning-charge-fill text-3xl text-gym-blue drop-shadow-[0_0_10px_rgba(0,229,255,0.5)] animate-pulse"></i>
+      </div>
+      <h1 class="text-3xl font-oswald font-bold m-0 bg-gradient-to-r from-gym-blue via-[#8B5CF6] to-gym-orange text-transparent bg-clip-text drop-shadow-sm">
+        FitZone Pro
+      </h1>
+      <p class="text-gym-gray mt-2 text-xs uppercase tracking-widest font-semibold opacity-80">Access Terminal</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+      <div class="bg-gym-red/10 border border-gym-red/30 text-gym-red px-4 py-3 rounded-lg mb-6 text-sm flex items-start gap-3 backdrop-blur-md shadow-[0_0_15px_rgba(255,0,60,0.1)]">
+        <i class="bi bi-exclamation-triangle-fill mt-0.5 drop-shadow-[0_0_5px_rgba(255,0,60,0.5)]"></i>
+        <div>
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+          <div class="font-medium">@err.ErrorMessage</div>
+        }
+        </div>
+      </div>
+    }
+
+    <form asp-action="Login" asp-controller="Account" method="post" class="space-y-6 relative z-10">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+      <!-- Email Input -->
+      <div class="relative group">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <i class="bi bi-envelope text-gym-gray group-focus-within:text-gym-blue transition-colors duration-300"></i>
+        </div>
+        <input type="email" name="Email" id="Email" class="w-full bg-[#111] border border-white/10 text-white text-sm rounded-xl focus:ring-1 focus:ring-gym-blue focus:border-gym-blue block pl-11 p-3.5 transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]" placeholder="admin@gym.com" required autocomplete="username" />
+        <label for="Email" class="absolute -top-2.5 left-3 bg-[#0A0A0A] px-2 text-[10px] font-bold tracking-wider text-gym-gray transition-all group-focus-within:text-gym-blue rounded">EMAIL</label>
+      </div>
+
+      <!-- Password Input -->
+      <div class="relative group">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <i class="bi bi-shield-lock text-gym-gray group-focus-within:text-gym-blue transition-colors duration-300"></i>
+        </div>
+        <input type="password" name="Password" id="Password" class="w-full bg-[#111] border border-white/10 text-white text-sm rounded-xl focus:ring-1 focus:ring-gym-blue focus:border-gym-blue block pl-11 p-3.5 transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required autocomplete="current-password" />
+        <label for="Password" class="absolute -top-2.5 left-3 bg-[#0A0A0A] px-2 text-[10px] font-bold tracking-wider text-gym-gray transition-all group-focus-within:text-gym-blue rounded">PASSWORD</label>
+      </div>
+
+      <!-- Options -->
+      <div class="flex items-center justify-between pt-1">
+        <label class="flex items-center gap-2 cursor-pointer group">
+          <div class="relative flex items-center">
+            <input type="checkbox" name="RememberMe" class="peer sr-only" />
+            <div class="w-4 h-4 rounded border border-white/20 bg-[#111] peer-checked:bg-gym-blue peer-checked:border-gym-blue transition-all duration-200 flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.3)]">
+              <i class="bi bi-check text-black font-bold text-lg leading-none opacity-0 peer-checked:opacity-100 transition-opacity drop-shadow-sm"></i>
+            </div>
+          </div>
+          <span class="text-xs text-gym-gray group-hover:text-white transition-colors uppercase tracking-wider font-semibold">Remember Module</span>
+        </label>
+        <a href="#" class="text-xs text-gym-blue hover:text-gym-blue/80 transition-colors drop-shadow-[0_0_5px_rgba(0,229,255,0.3)] uppercase tracking-wider font-semibold">Forgot Auth?</a>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="relative w-full group overflow-hidden rounded-xl p-[1px] mt-4">
+        <span class="absolute inset-0 bg-gradient-to-r from-gym-blue via-[#8B5CF6] to-gym-blue opacity-70 group-hover:opacity-100 blur-sm transition-opacity duration-300"></span>
+        <div class="relative bg-gradient-to-r from-[#0d121c] to-[#12091c] px-4 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 group-hover:bg-opacity-0">
+          <i class="bi bi-box-arrow-in-right text-white drop-shadow-md"></i>
+          <span class="text-white font-bold tracking-widest text-sm drop-shadow-md">INITIALIZE SESSION</span>
+        </div>
+      </button>
+    </form>
+
+          <!-- Quick Login Demo -->
+    <div class="mt-8 pt-6 border-t border-white/5 relative z-10">
+      <p class="text-center text-[10px] font-bold text-gym-gray/60 uppercase tracking-widest mb-4">Demo Access Profiles</p>
+      <div class="grid grid-cols-3 gap-3">
+        @foreach (var cred in new[] {
+          new { Role = "Admin", Email = "admin@gym.com", Pass = "Admin@123!", Icon = "bi-person-badge", Color = "text-gym-red" },
+          new { Role = "Staff", Email = "staff@gym.com", Pass = "Staff@123!", Icon = "bi-person-workspace", Color = "text-gym-blue" },
+          new { Role = "Member", Email = "member@gym.com", Pass = "Member@123!", Icon = "bi-person", Color = "text-gym-orange" }
+        })
+        {
+          <button type="button"
+                  onclick="document.getElementById('Email').value='@cred.Email';document.getElementById('Password').value='@cred.Pass'"
+                  class="flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/20 hover:bg-white/[0.08] transition-all duration-300 group">
+            <i class="bi @cred.Icon @cred.Color drop-shadow-[0_0_5px_currentColor] text-lg group-hover:scale-110 transition-transform"></i>
+            <span class="text-[9px] font-bold text-gray-400 group-hover:text-white uppercase tracking-widest">@cred.Role</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+

@@ -1,0 +1,132 @@
+﻿@model MemberDashboardVm
+@{
+  ViewData["Title"] = "My Dashboard";
+  Layout = "_Layout";
+}
+
+<div class="page-header animate-fade-in-up">
+  <div>
+    <h1 class="page-title gradient-text-blue">Welcome, @Model.Member.FullName.Split(' ')[0]!</h1>
+    <p class="page-subtitle text-gym-gray">@DateTime.Now.ToString("dddd, MMMM dd yyyy")</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-fade-in-up delay-100">
+  <!-- Membership Status Card -->
+  <div class="glass-card lg:col-span-1 relative overflow-hidden group">
+    <div class="absolute inset-0 bg-gradient-to-br from-gym-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    <h3 class="text-sm font-bold text-gym-gray uppercase tracking-widest mb-6 relative z-10">
+      Membership Status
+    </h3>
+    
+    @if (Model.ActiveMembership != null)
+    {
+      var m = Model.ActiveMembership;
+      var status = m.ComputedStatus;
+      var statusColor = status == MembershipStatus.Active ? "#39FF14" : status == MembershipStatus.ExpiringSoon ? "#FFB347" : "#FF003C";
+      var pct = m.Plan.DurationInDays > 0 ? Math.Min(100, (int)(m.DaysRemaining * 100.0 / m.Plan.DurationInDays)) : 0;
+
+      <div class="text-center mb-8 relative z-10">
+        <div class="text-6xl font-oswald font-bold tracking-tighter" style="color:@statusColor; text-shadow: 0 0 20px @(statusColor)40">@m.DaysRemaining</div>
+        <div class="text-sm text-gym-gray font-medium uppercase tracking-wide mt-2">days remaining</div>
+      </div>
+
+      <div class="progress-glass mb-6 relative z-10">
+        <div class="progress-bar-gradient" style="width:@(pct)%;background:linear-gradient(90deg, @statusColor, transparent);box-shadow: 0 0 15px @statusColor"></div>
+      </div>
+
+      <div class="relative z-10">
+        <div class="text-lg font-bold text-white mb-1">@m.Plan?.PlanName</div>
+        <div class="text-sm text-gym-gray font-medium mb-4">Expires: @m.EndDate.ToString("MMM dd, yyyy")</div>
+        <span class="badge-status @(status == MembershipStatus.Active ? "badge-active" : status == MembershipStatus.ExpiringSoon ? "badge-expiring" : "badge-expired")">
+          @status
+        </span>
+      </div>
+    }
+    else
+    {
+      <div class="text-center py-10 relative z-10">
+        <div class="w-20 h-20 mx-auto rounded-full bg-[#FF003C]/10 flex items-center justify-center mb-4">
+          <i class="bi bi-x-circle text-4xl text-[#FF003C] drop-shadow-[0_0_10px_rgba(255,0,60,0.5)]"></i>
+        </div>
+        <p class="text-lg font-semibold text-gym-gray">No active membership</p>
+      </div>
+    }
+  </div>
+
+  <!-- Stats & Secondary Info -->
+  <div class="lg:col-span-2 flex flex-col gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div class="stat-card blue">
+        <div class="stat-icon"><i class="bi bi-calendar-check-fill"></i></div>
+        <div class="stat-value">@Model.TotalAttendance</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon"><i class="bi bi-calendar-month"></i></div>
+        <div class="stat-value">@Model.MonthAttendance</div>
+        <div class="stat-label">This Month</div>
+      </div>
+    </div>
+
+    @if (Model.CurrentBatch != null)
+    {
+      <div class="glass-card flex items-center gap-5 border-[#8B5CF6]/30 hover:border-[#8B5CF6]/60">
+        <div class="w-12 h-12 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+          <i class="bi bi-calendar2-week-fill text-2xl text-[#8B5CF6]"></i>
+        </div>
+        <div>
+          <div class="text-lg font-bold text-white tracking-wide">@Model.CurrentBatch.Batch?.BatchName</div>
+          <div class="text-sm text-gym-gray font-medium mt-1">
+            @Model.CurrentBatch.Batch?.StartTime.ToString("hh:mm tt") — @Model.CurrentBatch.Batch?.EndTime.ToString("hh:mm tt")
+            @if (Model.CurrentBatch.Batch?.Trainer != null)
+            { <span class="text-white ml-2">• @Model.CurrentBatch.Batch.Trainer.FullName</span> }
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (Model.PendingFines.Any())
+    {
+      <div class="alert-glass alert-warning-glass flex items-start gap-4">
+        <i class="bi bi-exclamation-triangle-fill text-xl mt-0.5"></i>
+        <div>
+          You have <strong class="text-white">@Model.PendingFines.Count</strong> pending fine(s) totaling
+          <strong class="text-white">₹@Model.PendingFines.Sum(f => f.Amount).ToString("N2")</strong>. Please contact the desk.
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Recent Payments -->
+<div class="glass-card animate-fade-in-up delay-200">
+  <h3 class="text-xl font-oswald font-bold text-white tracking-wide mb-6">Recent Payments</h3>
+  @if (!Model.RecentPayments.Any())
+  {
+    <p class="text-center text-gym-gray py-8">No payments yet</p>
+  }
+  else
+  {
+    <div class="overflow-x-auto">
+      <table class="glass-table">
+        <thead><tr><th>Date</th><th>Receipt</th><th>Type</th><th>Amount</th></tr></thead>
+        <tbody>
+          @foreach (var p in Model.RecentPayments)
+          {
+            <tr>
+              <td class="text-gym-gray font-medium">@p.PaymentDate.ToString("MMM dd, yyyy")</td>
+              <td class="text-xs text-gym-gray tracking-widest font-mono">@p.ReceiptNumber</td>
+              <td class="font-medium text-white">@p.PaymentType.ToString()</td>
+              <td class="text-[#39FF14] font-bold text-[15px]">₹@p.Amount.ToString("N2")</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@{
+  // No profile view — redirect to dashboard
+}

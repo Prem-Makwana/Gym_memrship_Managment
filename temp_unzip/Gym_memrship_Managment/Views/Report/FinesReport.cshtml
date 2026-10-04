@@ -1,0 +1,79 @@
+@model IEnumerable<Gym_memrship_Managment.Interfaces.FineReportItem>
+@{
+    ViewData["Title"] = "Fines Report";
+    Layout = "_Layout";
+    var fromDate = ViewBag.From as DateTime?;
+    var toDate = ViewBag.To as DateTime?;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Fines Report</h1>
+        <p class="page-subtitle">
+            Showing results @(fromDate.HasValue ? $"from {fromDate.Value:MMM dd, yyyy}" : "") 
+            @(toDate.HasValue ? $"to {toDate.Value:MMM dd, yyyy}" : "")
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <form method="get" action="/Report/Fines">
+            <input type="hidden" name="from" value="@fromDate?.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="to" value="@toDate?.ToString("yyyy-MM-dd")" />
+            <button type="submit" name="export" value="true" class="btn-outline-glass">
+                <i class="bi bi-download"></i> Export CSV
+            </button>
+        </form>
+        <a href="/Report" class="btn-outline-glass">Back to Reports</a>
+    </div>
+</div>
+
+<div class="glass-card p-0">
+    <div class="table-responsive">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Date Issued</th>
+                    <th>Reason</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="font-medium text-white">@item.MemberName</div>
+                            <div class="text-[12px] text-[#9994AA]">@item.MembershipNumber</div>
+                        </td>
+                        <td>@item.DateIssued.ToString("MMM dd, yyyy")</td>
+                        <td>@item.Reason</td>
+                        <td class="font-semibold text-[#FF006E]">@item.Amount.ToString("C")</td>
+                        <td>
+                            @if (item.Status == "Paid")
+                            {
+                                <span class="badge-status badge-active">@item.Status</span>
+                            }
+                            else if (item.Status == "Waived")
+                            {
+                                <span class="badge-status badge-inactive">@item.Status</span>
+                            }
+                            else
+                            {
+                                <span class="badge-status badge-expired">@item.Status</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-[#9994AA] p-[30px]">
+                            No data found for the selected criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

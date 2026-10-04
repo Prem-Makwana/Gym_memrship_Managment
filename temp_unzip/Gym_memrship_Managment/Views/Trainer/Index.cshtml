@@ -1,0 +1,51 @@
+@model List<Trainer>
+@{
+  ViewData["Title"] = "Trainers";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Trainers</h1></div>
+  @if (User.IsInRole("Admin"))
+  {
+    <a href="/Trainer/Create" class="btn-gradient-blue"><i class="bi bi-plus-lg"></i> Add Trainer</a>
+  }
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+  @foreach (var t in Model)
+  {
+    var activeBatches = t.Batches.Count(b => b.IsActive && !b.IsDeleted);
+    <div class="glass-card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div class="avatar" style="width:48px;height:48px;font-size:20px;background:linear-gradient(135deg,#8B5CF6,#FF006E)">@t.FullName.Substring(0,1)</div>
+        <div>
+          <div style="font-weight:600;font-size:15px">@t.FullName</div>
+          <div style="font-size:12px;color:#9994AA">@t.Specialization</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px">
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px">
+          <div style="color:#5c5875">Experience</div>
+          <div style="font-weight:600;color:#8B5CF6">@t.ExperienceYears yrs</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px">
+          <div style="color:#5c5875">Batches</div>
+          <div style="font-weight:600;color:#00D4FF">@activeBatches</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#9994AA;margin-bottom:12px"><i class="bi bi-telephone"></i> @t.Phone</div>
+      <div style="display:flex;gap:6px">
+        <a href="/Trainer/Details/@t.TrainerId" class="btn-outline-glass" style="flex:1;text-align:center;font-size:12px">
+          <i class="bi bi-eye"></i> View
+        </a>
+        @if (User.IsInRole("Admin"))
+        {
+          <a href="/Trainer/Edit/@t.TrainerId" class="btn-outline-glass" style="padding:6px 10px;font-size:12px">
+            <i class="bi bi-pencil"></i>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>

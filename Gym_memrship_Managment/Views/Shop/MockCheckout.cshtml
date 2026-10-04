@@ -1,0 +1,125 @@
+﻿@{
+    ViewData["Title"] = "Mock Payment Gateway";
+    Layout = "_Layout";
+    var type = ViewBag.Type as string;
+    var planId = ViewBag.PlanId;
+    var membershipId = ViewBag.MembershipId;
+    var amount = ViewBag.Amount;
+    var description = ViewBag.Description;
+}
+
+<div class="max-w-3xl mx-auto py-10 anime-container">
+    
+    <div class="text-center mb-8 anime-item opacity-0">
+        <h1 class="text-4xl font-oswald font-bold text-white tracking-wide mb-2">
+            SECURE <span class="gradient-text-blue">CHECKOUT</span>
+        </h1>
+        <p class="text-gym-gray">College Project Mode: No real money will be charged.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Order Summary -->
+        <div class="glass-card anime-item opacity-0">
+            <h3 class="text-lg font-bold text-white mb-6 uppercase tracking-wider border-b  pb-3">Order Summary</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="text-xs text-gym-gray uppercase">Item</div>
+                    <div class="text-lg font-bold text-gym-blue">@description</div>
+                </div>
+                <div class="flex justify-between items-end border-t  pt-4 mt-4">
+                    <span class="text-gym-gray uppercase font-bold">Total Due</span>
+                    <span class="text-3xl font-oswald font-bold text-white">₹@(((decimal)amount).ToString("N2"))</span>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gym-orange/10 border border-gym-orange/30 rounded-xl flex gap-3">
+                <i class="bi bi-info-circle-fill text-gym-orange"></i>
+                <p class="text-xs text-gym-gray">
+                    This is a simulated payment gateway for demonstration purposes. Clicking pay will process a mock transaction.
+                </p>
+            </div>
+        </div>
+
+        <!-- Fake Payment Form -->
+        <div class="glass-card anime-item opacity-0">
+            <h3 class="text-lg font-bold text-white mb-6 uppercase tracking-wider border-b  pb-3">Payment Details</h3>
+            
+            <form asp-action="ProcessMockPayment" method="post" id="mockPaymentForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="type" value="@type" />
+                <input type="hidden" name="planId" value="@planId" />
+                <input type="hidden" name="membershipId" value="@membershipId" />
+                <input type="hidden" name="amount" value="@amount" />
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs text-gym-gray uppercase tracking-wider mb-2">Cardholder Name</label>
+                        <input type="text" class="w-full bg-black/50 border  rounded-xl px-4 py-3 text-white focus:border-gym-blue focus:ring-1 focus:ring-gym-blue outline-none transition-all" value="Demo User" readonly />
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-gym-gray uppercase tracking-wider mb-2">Card Number</label>
+                        <div class="relative">
+                            <input type="text" class="w-full bg-black/50 border  rounded-xl pl-12 pr-4 py-3 text-white font-mono tracking-widest focus:border-gym-blue focus:ring-1 focus:ring-gym-blue outline-none transition-all" value="4242 4242 4242 4242" readonly />
+                            <i class="bi bi-credit-card-fill absolute left-4 top-3.5 text-gym-gray"></i>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gym-gray uppercase tracking-wider mb-2">Expiry</label>
+                            <input type="text" class="w-full bg-black/50 border  rounded-xl px-4 py-3 text-white font-mono focus:border-gym-blue focus:ring-1 focus:ring-gym-blue outline-none transition-all" value="12/28" readonly />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gym-gray uppercase tracking-wider mb-2">CVC</label>
+                            <input type="text" class="w-full bg-black/50 border  rounded-xl px-4 py-3 text-white font-mono focus:border-gym-blue focus:ring-1 focus:ring-gym-blue outline-none transition-all" value="123" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="payBtn" class="w-full btn-gradient-blue rounded-xl py-4 mt-8 font-bold tracking-widest flex justify-center items-center gap-2 transition-all">
+                    <i class="bi bi-lock-fill"></i> PAY ₹@(((decimal)amount).ToString("N0"))
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Animate UI
+    if(typeof anime !== 'undefined') {
+        anime({
+            targets: '.anime-item',
+            translateY: [30, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(150),
+            easing: 'easeOutExpo',
+            duration: 800
+        });
+    }
+
+    // Fake processing animation
+    const btn = document.getElementById('payBtn');
+    const form = document.getElementById('mockPaymentForm');
+    
+    btn.addEventListener('click', () => {
+        btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> PROCESSING...';
+        btn.classList.add('opacity-80', 'cursor-not-allowed');
+        
+        setTimeout(() => {
+            btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> PAYMENT SUCCESSFUL';
+            btn.classList.remove('btn-gradient-blue');
+            btn.classList.add('bg-gym-green', 'text-black');
+            
+            setTimeout(() => {
+                form.submit();
+            }, 600);
+        }, 1500);
+    });
+});
+</script>
+}
+

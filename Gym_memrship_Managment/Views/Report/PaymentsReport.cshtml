@@ -1,0 +1,77 @@
+﻿@model IEnumerable<Gym_memrship_Managment.Interfaces.PaymentReportItem>
+@{
+    ViewData["Title"] = "Payments Report";
+    Layout = "_Layout";
+    var fromDate = ViewBag.From as DateTime?;
+    var toDate = ViewBag.To as DateTime?;
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Payments Report</h1>
+        <p class="page-subtitle">
+            Showing results @(fromDate.HasValue ? $"from {fromDate.Value:MMM dd, yyyy}" : "") 
+            @(toDate.HasValue ? $"to {toDate.Value:MMM dd, yyyy}" : "")
+        </p>
+    </div>
+    <div class="flex gap-2">
+        <form method="get" action="/Report/Payments">
+            <input type="hidden" name="from" value="@fromDate?.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="to" value="@toDate?.ToString("yyyy-MM-dd")" />
+            <button type="submit" name="export" value="true" class="btn-outline-glass">
+                <i class="bi bi-download"></i> Export CSV
+            </button>
+        </form>
+        <a href="/Report" class="btn-outline-glass">Back to Reports</a>
+    </div>
+</div>
+
+<div class="glass-card p-0">
+    <div class="table-responsive">
+        <table class="glass-table">
+            <thead>
+                <tr>
+                    <th>Receipt</th>
+                    <th>Member</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="font-medium text-white">@item.ReceiptNumber</td>
+                        <td>
+                            <div class="text-white">@item.MemberName</div>
+                            <div class="text-[12px] text-[#9994AA]">@item.MembershipNumber</div>
+                        </td>
+                        <td>@item.PaymentDate.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td class="font-semibold text-[#00FF88]">@item.Amount.ToString("C")</td>
+                        <td>@item.PaymentType</td>
+                        <td>@item.PaymentMethod</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-[#9994AA] p-[30px]">
+                            No data found for the selected criteria.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <tr class="bg-white/5">
+                        <td colspan="3" class="text-right font-semibold text-white">Total:</td>
+                        <td colspan="3" class="font-semibold text-[#00FF88] text-[16px]">
+                            @Model.Sum(x => x.Amount).ToString("C")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

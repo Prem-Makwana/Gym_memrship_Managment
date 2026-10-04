@@ -1,0 +1,185 @@
+@model MemberDetailsVm
+@{
+  ViewData["Title"] = Model.Member.FullName;
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="avatar" style="width:50px;height:50px;font-size:20px">@Model.Member.FullName.Substring(0,1)</div>
+    <div>
+      <h1 class="page-title" style="margin-bottom:2px">@Model.Member.FullName</h1>
+      <p class="page-subtitle" style="margin:0">@Model.Member.MembershipNumber • Joined @Model.Member.JoinDate.ToString("MMM yyyy")</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="/Member/Edit/@Model.Member.MemberId" class="btn-outline-glass"><i class="bi bi-pencil"></i> Edit</a>
+    <a href="/Membership/Enroll?memberId=@Model.Member.MemberId" class="btn-gradient-blue"><i class="bi bi-card-checklist"></i> Enroll</a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:16px">
+  <!-- Left Column: Member Info -->
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <!-- Profile Card -->
+    <div class="glass-card">
+      <h3 style="margin:0 0 16px;font-size:14px;font-weight:600;color:#9994AA;text-transform:uppercase;letter-spacing:0.8px">Profile</h3>
+      @{
+        var sc = Model.Member.Status == MemberStatus.Active ? "badge-active" : "badge-inactive";
+      }
+      <span class="badge-status @sc" style="margin-bottom:16px">@Model.Member.Status</span>
+
+      <div style="display:grid;gap:10px">
+        @if (Model.Member.Gender != default)
+        {
+          <div><span style="color:#5c5875;font-size:12px">Gender</span><div style="font-size:13px">@Model.Member.Gender</div></div>
+        }
+        @if (Model.Member.DateOfBirth.HasValue)
+        {
+          <div><span style="color:#5c5875;font-size:12px">Age</span><div style="font-size:13px">@(DateTime.Today.Year - Model.Member.DateOfBirth.Value.Year) years</div></div>
+        }
+        <div><span style="color:#5c5875;font-size:12px">Phone</span><div style="font-size:13px">@Model.Member.Phone</div></div>
+        <div><span style="color:#5c5875;font-size:12px">Email</span><div style="font-size:13px;word-break:break-all">@Model.Member.Email</div></div>
+        @if (!string.IsNullOrEmpty(Model.Member.Address))
+        {
+          <div><span style="color:#5c5875;font-size:12px">Address</span><div style="font-size:13px">@Model.Member.Address</div></div>
+        }
+        @if (!string.IsNullOrEmpty(Model.Member.EmergencyContactName))
+        {
+          <div><span style="color:#5c5875;font-size:12px">Emergency</span><div style="font-size:13px">@Model.Member.EmergencyContactName<br/><span style="color:#9994AA">@Model.Member.EmergencyContactPhone</span></div></div>
+        }
+      </div>
+    </div>
+
+    <!-- Active Membership Card -->
+    @if (Model.ActiveMembership != null)
+    {
+      var m = Model.ActiveMembership;
+      var status = m.ComputedStatus;
+      var statusCls = status == MembershipStatus.Active ? "badge-active" : status == MembershipStatus.ExpiringSoon ? "badge-expiring" : "badge-expired";
+      <div class="glass-card glow-blue">
+        <h3 style="margin:0 0 12px;font-size:14px;font-weight:600;color:#00D4FF">Active Membership</h3>
+        <div style="font-weight:600;margin-bottom:4px">@m.Plan?.PlanName</div>
+        <div style="font-size:12px;color:#9994AA;margin-bottom:12px">@m.StartDate.ToString("MMM dd") — @m.EndDate.ToString("MMM dd, yyyy")</div>
+        <span class="badge-status @statusCls">@status — @m.DaysRemaining days left</span>
+        <div class="progress-glass" style="margin-top:12px">
+          <div class="progress-bar-gradient" style="width:@(Math.Min(100,(int)(m.DaysRemaining*100.0/Math.Max(1,m.Plan?.DurationInDays ?? 30))))%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px;font-size:13px">
+          <span style="color:#9994AA">Paid: <span style="color:#00FF88">$@m.PaidAmount.ToString("N2")</span></span>
+          @if (m.DueAmount > 0)
+          { <span style="color:#FF006E">Due: $@m.DueAmount.ToString("N2")</span> }
+        </div>
+        <a href="/Membership/Renew/@m.MembershipId" class="btn-gradient-blue" style="width:100%;margin-top:12px;text-align:center;display:block">
+          <i class="bi bi-arrow-repeat"></i> Renew
+        </a>
+      </div>
+    }
+
+    <!-- Current Batch -->
+    @if (Model.CurrentBatch != null)
+    {
+      <div class="glass-card">
+        <h3 style="margin:0 0 12px;font-size:14px;font-weight:600;color:#8B5CF6">Current Batch</h3>
+        <div style="font-weight:600">@Model.CurrentBatch.Batch?.BatchName</div>
+        <div style="font-size:12px;color:#9994AA;margin-top:4px">@Model.CurrentBatch.Batch?.StartTime.ToString("hh:mm tt") — @Model.CurrentBatch.Batch?.EndTime.ToString("hh:mm tt")</div>
+        @if (Model.CurrentBatch.Batch?.Trainer != null)
+        { <div style="font-size:12px;color:#9994AA">Trainer: @Model.CurrentBatch.Batch.Trainer.FullName</div> }
+      </div>
+    }
+  </div>
+
+  <!-- Right Column -->
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <!-- Fines Alert -->
+    @if (Model.Fines.Any(f => f.Status == FineStatus.Pending))
+    {
+      <div class="alert-glass alert-warning-glass">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <strong>Outstanding Fines: $@Model.Fines.Where(f => f.Status == FineStatus.Pending).Sum(f => f.Amount).ToString("N2")</strong> — Must be cleared before check-in.
+      </div>
+    }
+
+    <!-- Recent Payments -->
+    <div class="glass-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-size:14px;font-weight:600">Recent Payments</h3>
+        <a href="/Payment/Ledger/@Model.Member.MemberId" style="font-size:12px;color:#00D4FF;text-decoration:none">Full Ledger →</a>
+      </div>
+      @if (!Model.RecentPayments.Any())
+      { <p style="color:#5c5875;font-size:13px">No payments yet</p> }
+      else
+      {
+        <table class="glass-table">
+          <thead><tr><th>Date</th><th>Receipt</th><th>Type</th><th>Amount</th></tr></thead>
+          <tbody>
+            @foreach (var p in Model.RecentPayments)
+            {
+              <tr>
+                <td style="color:#9994AA;font-size:12px">@p.PaymentDate.ToString("MMM dd, yyyy")</td>
+                <td style="font-size:11px;color:#5c5875">@p.ReceiptNumber</td>
+                <td>@p.PaymentType</td>
+                <td style="color:#00FF88;font-weight:600">$@p.Amount.ToString("N2")</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+      <div style="margin-top:12px">
+        <a href="/Payment/Create/@Model.Member.MemberId" class="btn-outline-glass" style="font-size:12px">
+          <i class="bi bi-plus"></i> Record Payment
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Attendance -->
+    <div class="glass-card">
+      <h3 style="margin:0 0 12px;font-size:14px;font-weight:600">Recent Attendance</h3>
+      @if (!Model.RecentAttendance.Any())
+      { <p style="color:#5c5875;font-size:13px">No attendance records</p> }
+      else
+      {
+        <table class="glass-table">
+          <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Duration</th><th>Batch</th></tr></thead>
+          <tbody>
+            @foreach (var a in Model.RecentAttendance)
+            {
+              <tr>
+                <td style="color:#9994AA">@a.Date.ToString("MMM dd")</td>
+                <td>@a.CheckInTime.ToString("hh:mm tt")</td>
+                <td>@(a.CheckOutTime.HasValue ? a.CheckOutTime.Value.ToString("hh:mm tt") : "-")</td>
+                <td style="color:#9994AA">@(a.DurationMinutes.HasValue ? $"{a.DurationMinutes} min" : "-")</td>
+                <td style="font-size:12px;color:#5c5875">@(a.Batch?.BatchName ?? "-")</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Membership History -->
+    @if (Model.MembershipHistory.Any())
+    {
+      <div class="glass-card">
+        <h3 style="margin:0 0 12px;font-size:14px;font-weight:600">Membership History</h3>
+        <table class="glass-table">
+          <thead><tr><th>Plan</th><th>Start</th><th>End</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+            @foreach (var ms in Model.MembershipHistory)
+            {
+              var st = ms.ComputedStatus;
+              var bc = st == MembershipStatus.Active ? "badge-active" : st == MembershipStatus.ExpiringSoon ? "badge-expiring" : st == MembershipStatus.Expired ? "badge-expired" : st == MembershipStatus.Suspended ? "badge-suspended" : "badge-cancelled";
+              <tr>
+                <td>@ms.Plan?.PlanName</td>
+                <td style="color:#9994AA;font-size:12px">@ms.StartDate.ToString("MMM dd, yyyy")</td>
+                <td style="color:#9994AA;font-size:12px">@ms.EndDate.ToString("MMM dd, yyyy")</td>
+                <td style="color:#00FF88">$@ms.FinalAmount.ToString("N2")</td>
+                <td><span class="badge-status @bc" style="font-size:10px">@st</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

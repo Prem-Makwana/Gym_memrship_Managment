@@ -1,0 +1,62 @@
+﻿@model Trainer
+@{
+  ViewData["Title"] = Model.FullName;
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="avatar" style="width:50px;height:50px;font-size:20px;background:linear-gradient(135deg,#8B5CF6,#FF006E)">@Model.FullName.Substring(0,1)</div>
+    <div>
+      <h1 class="page-title" style="margin:0">@Model.FullName</h1>
+      <p class="page-subtitle" style="margin:0">@Model.Specialization</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    @if (User.IsInRole("Admin"))
+    {
+      <a href="/Trainer/Edit/@Model.TrainerId" class="btn-outline-glass"><i class="bi bi-pencil"></i> Edit</a>
+    }
+    <a href="/Trainer" class="btn-outline-glass"><i class="bi bi-arrow-left"></i> Back</a>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:16px">
+  <div class="glass-card">
+    <h3 style="margin:0 0 16px;font-size:14px;font-weight:600;color:#9994AA;text-transform:uppercase;letter-spacing:0.8px">Details</h3>
+    <div style="display:grid;gap:12px">
+      <div><span style="color:#5c5875;font-size:12px">Phone</span><div>@Model.Phone</div></div>
+      @if (!string.IsNullOrEmpty(Model.Email))
+      { <div><span style="color:#5c5875;font-size:12px">Email</span><div>@Model.Email</div></div> }
+      <div><span style="color:#5c5875;font-size:12px">Experience</span><div style="color:#8B5CF6;font-weight:600">@Model.ExperienceYears years</div></div>
+      <div><span style="color:#5c5875;font-size:12px">Joining Date</span><div>@Model.JoiningDate.ToString("MMM dd, yyyy")</div></div>
+      <div>
+        <span style="color:#5c5875;font-size:12px">Status</span>
+        <span class="badge-status @(Model.Status == TrainerStatus.Active ? "badge-active" : "badge-inactive")">@Model.Status</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card">
+    <h3 style="margin:0 0 16px;font-size:14px;font-weight:600">Assigned Batches</h3>
+    @if (!Model.Batches.Any())
+    { <p style="color:#5c5875">No batches assigned</p> }
+    else
+    {
+      @foreach (var b in Model.Batches.Where(b => !b.IsDeleted))
+      {
+        var enrolled = b.Enrollments.Count(e => e.Status == EnrollmentStatus.Active);
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <div>
+            <div style="font-weight:500">@b.BatchName</div>
+            <div style="font-size:12px;color:#9994AA">@b.StartTime.ToString("hh:mm tt") — @b.EndTime.ToString("hh:mm tt")</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:#9994AA">@enrolled / @b.MaximumCapacity members</div>
+            <a href="/Batch/BatchMembers/@b.BatchId" style="font-size:11px;color:#00D4FF;text-decoration:none">View →</a>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

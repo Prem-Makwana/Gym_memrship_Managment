@@ -1,0 +1,75 @@
+@model List<Payment>
+@{
+  ViewData["Title"] = "Payments";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Payments</h1>
+    <p class="page-subtitle">Today's Collection: <span style="color:#00FF88;font-weight:700">$@ViewBag.TodayCollection.ToString("N2")</span></p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="glass-card" style="margin-bottom:16px;padding:14px 20px">
+  <form method="get" style="display:flex;gap:12px;align-items:center">
+    <div>
+      <label class="form-label-dark" style="display:block">From</label>
+      <input type="date" name="from" value="@ViewBag.From?.ToString("yyyy-MM-dd")" class="form-control-dark" />
+    </div>
+    <div>
+      <label class="form-label-dark" style="display:block">To</label>
+      <input type="date" name="to" value="@ViewBag.To?.ToString("yyyy-MM-dd")" class="form-control-dark" />
+    </div>
+    <div style="align-self:flex-end">
+      <button type="submit" class="btn-gradient-blue">Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="glass-card" style="padding:0;overflow:hidden">
+  <table class="glass-table">
+    <thead>
+      <tr><th>Receipt</th><th>Member</th><th>Date</th><th>Type</th><th>Method</th><th>Amount</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      @if (!Model.Any())
+      {
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:#5c5875">No payments found</td></tr>
+      }
+      @foreach (var p in Model)
+      {
+        <tr>
+          <td style="font-size:12px;font-family:monospace;color:#9994AA">@p.ReceiptNumber</td>
+          <td>
+            <div style="font-weight:500">@p.Member?.FullName</div>
+            <div style="font-size:11px;color:#5c5875">@p.Member?.MembershipNumber</div>
+          </td>
+          <td style="color:#9994AA;font-size:12px">@p.PaymentDate.ToString("MMM dd, yyyy")</td>
+          <td><span class="badge-status badge-info-glass" style="background:rgba(0,212,255,0.1);color:#00D4FF;border:1px solid rgba(0,212,255,0.2)">@p.PaymentType</span></td>
+          <td style="color:#9994AA">@p.PaymentMethod</td>
+          <td style="color:#00FF88;font-weight:700">$@p.Amount.ToString("N2")</td>
+          <td>
+            <a href="/Payment/Receipt/@p.PaymentId" class="btn-outline-glass" style="padding:5px 10px;font-size:12px">
+              <i class="bi bi-printer"></i> Receipt
+            </a>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+  <div style="display:flex;justify-content:center;margin-top:16px">
+    <div class="pagination-glass">
+      @for (var i = 1; i <= (int)ViewBag.TotalPages; i++)
+      {
+        <a href="?from=@ViewBag.From?.ToString("yyyy-MM-dd")&to=@ViewBag.To?.ToString("yyyy-MM-dd")&page=@i"
+           class="page-btn @(i == (int)ViewBag.CurrentPage ? "active" : "")">@i</a>
+      }
+    </div>
+  </div>
+}

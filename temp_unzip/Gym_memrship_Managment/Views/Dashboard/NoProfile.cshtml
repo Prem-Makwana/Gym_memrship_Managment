@@ -1,0 +1,27 @@
+@{
+  ViewData["Title"] = "No Profile";
+  Layout = "_Layout";
+}
+
+<div class="flex items-center justify-center min-h-[60vh] animate-fade-in-up">
+  <div class="glass-card max-w-md w-full text-center p-10 relative overflow-hidden group">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#FF003C]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    
+    <div class="w-24 h-24 mx-auto rounded-full bg-[#FF003C]/10 flex items-center justify-center mb-6 relative z-10 shadow-[0_0_20px_rgba(255,0,60,0.2)]">
+      <i class="bi bi-person-x text-5xl text-[#FF003C] drop-shadow-[0_0_15px_rgba(255,0,60,0.6)]"></i>
+    </div>
+    
+    <h2 class="text-2xl font-oswald font-bold text-white tracking-wide mb-3 relative z-10">No Member Profile Found</h2>
+    
+    <p class="text-gym-gray text-sm mb-8 leading-relaxed relative z-10">
+      Your account does not have an associated member profile.<br>
+      Please contact the gym administrator to set up your profile and membership.
+    </p>
+
+    <div class="relative z-10">
+      <a href="/Dashboard" class="btn-outline-glass w-full justify-center">
+        <i class="bi bi-arrow-left"></i> Return to Home
+      </a>
+    </div>
+  </div>
+</div>

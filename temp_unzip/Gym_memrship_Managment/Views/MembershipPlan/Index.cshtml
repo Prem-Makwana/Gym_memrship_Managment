@@ -1,0 +1,75 @@
+@model List<MembershipPlan>
+@{
+  ViewData["Title"] = "Membership Plans";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Membership Plans</h1></div>
+  @if (User.IsInRole("Admin"))
+  {
+    <a href="/MembershipPlan/Create" class="btn-gradient-blue"><i class="bi bi-plus-lg"></i> New Plan</a>
+  }
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+  @foreach (var plan in Model)
+  {
+    var colorClass = plan.PlanName.Contains("Basic") ? "blue" : plan.PlanName.Contains("Standard") ? "purple" : "gold";
+    <div class="glass-card @(plan.IsActive ? "" : "opacity-50")" style="position:relative">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:@(colorClass == "blue" ? "linear-gradient(90deg,#00D4FF,#8B5CF6)" : colorClass == "purple" ? "linear-gradient(90deg,#8B5CF6,#FF006E)" : "linear-gradient(90deg,#FFB347,#FF006E)");border-radius:16px 16px 0 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <h3 style="margin:0;font-size:16px;font-weight:700">@plan.PlanName</h3>
+        @if (!plan.IsActive)
+        { <span class="badge-status badge-inactive">Inactive</span> }
+        else
+        { <span class="badge-status badge-active">Active</span> }
+      </div>
+
+      @if (!string.IsNullOrEmpty(plan.Description))
+      {
+        <p style="color:#9994AA;font-size:13px;margin-bottom:16px">@plan.Description</p>
+      }
+
+      <div style="font-size:32px;font-weight:700;margin-bottom:4px;color:#F0F0F8">
+        $@plan.Price.ToString("N0")
+        <span style="font-size:14px;color:#9994AA;font-weight:400">/ @plan.DurationInDays days</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0;font-size:12px">
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px">
+          <div style="color:#5c5875">Registration Fee</div>
+          <div style="font-weight:600;color:#F0F0F8">$@plan.RegistrationFee.ToString("N2")</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px">
+          <div style="color:#5c5875">Renewal Fee</div>
+          <div style="font-weight:600;color:#F0F0F8">$@plan.RenewalFee.ToString("N2")</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px">
+          <div style="color:#5c5875">Late Fee / Day</div>
+          <div style="font-weight:600;color:#FFB347">$@plan.LateFeePerDay.ToString("N2")</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px">
+          <div style="color:#5c5875">Grace Period</div>
+          <div style="font-weight:600;color:#F0F0F8">@plan.GracePeriodDays days</div>
+        </div>
+      </div>
+
+      @if (User.IsInRole("Admin"))
+      {
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <a href="/MembershipPlan/Edit/@plan.PlanId" class="btn-outline-glass" style="flex:1;text-align:center;font-size:12px">
+            <i class="bi bi-pencil"></i> Edit
+          </a>
+          <form method="post" action="/MembershipPlan/Delete/@plan.PlanId" style="flex:1">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-outline-glass" style="width:100%;font-size:12px;color:#FF006E;border-color:rgba(255,0,110,0.3)"
+                    onclick="return confirm('Delete this plan?')">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      }
+    </div>
+  }
+</div>

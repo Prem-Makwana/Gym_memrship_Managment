@@ -1,0 +1,269 @@
+@model AdminDashboardVm
+@{
+  ViewData["Title"] = "Admin Dashboard";
+  Layout = "_Layout";
+}
+
+<!-- Stat Cards Row 1 -->
+<div class="page-header animate-fade-in-up">
+  <div>
+    <h1 class="page-title gradient-text-blue">Dashboard Overview</h1>
+    <p class="page-subtitle text-gym-gray">@DateTime.Now.ToString("dddd, MMMM dd yyyy")</p>
+  </div>
+  <div class="flex gap-4">
+    <a href="/Member/Create" class="btn-gradient-blue"><i class="bi bi-person-plus text-lg"></i> Add Member</a>
+    <a href="/Report" class="btn-outline-glass"><i class="bi bi-bar-chart text-lg"></i> Reports</a>
+  </div>
+</div>
+
+<!-- KPI Row 1 -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+  <div class="stat-card blue">
+    <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.TotalMembers">0</div>
+    <div class="stat-label">Total Members</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon"><i class="bi bi-person-check-fill"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.ActiveMembers">0</div>
+    <div class="stat-label">Active Members</div>
+  </div>
+  <div class="stat-card gold">
+    <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.ExpiringThisWeek">0</div>
+    <div class="stat-label">Expiring This Week</div>
+  </div>
+  <div class="stat-card pink">
+    <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.ExpiredMembers">0</div>
+    <div class="stat-label">Expired</div>
+  </div>
+</div>
+
+<!-- KPI Row 2 -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+  <div class="stat-card blue">
+    <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.TodayRevenue" data-prefix="$">0</div>
+    <div class="stat-label">Today's Revenue</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.MonthRevenue" data-prefix="$">0</div>
+    <div class="stat-label">Month Revenue</div>
+  </div>
+  <div class="stat-card gold">
+    <div class="stat-icon"><i class="bi bi-qr-code-scan"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.TodayCheckIns">0</div>
+    <div class="stat-label">Today's Check-Ins</div>
+  </div>
+  <div class="stat-card pink">
+    <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+    <div class="stat-value anime-count-up" data-value="@Model.PendingFines">0</div>
+    <div class="stat-label">Pending Fines</div>
+  </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+  <!-- Revenue Trend -->
+  <div class="glass-card xl:col-span-2">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-oswald font-bold text-white tracking-wide">Revenue Trend</h3>
+      <span class="text-xs text-gym-gray uppercase tracking-wider font-semibold bg-white/5 px-3 py-1 rounded-full border border-white/10">Last 12 months</span>
+    </div>
+    <div class="chart-container h-[300px]">
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+  <!-- Plan Distribution -->
+  <div class="glass-card xl:col-span-1">
+    <div class="mb-6">
+      <h3 class="text-xl font-oswald font-bold text-white tracking-wide">Plan Distribution</h3>
+    </div>
+    <div class="chart-container h-[300px] flex justify-center">
+      <canvas id="planChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+  <!-- Attendance Chart -->
+  <div class="glass-card">
+    <h3 class="text-xl font-oswald font-bold text-white tracking-wide mb-6">Daily Attendance (14 days)</h3>
+    <div class="chart-container h-[250px]">
+      <canvas id="attendanceChart"></canvas>
+    </div>
+  </div>
+  <!-- Batch Occupancy -->
+  <div class="glass-card">
+    <h3 class="text-xl font-oswald font-bold text-white tracking-wide mb-6">Batch Occupancy</h3>
+    <div class="space-y-5">
+      @foreach (var b in Model.BatchOccupancy)
+      {
+        var pct = b.Capacity > 0 ? (int)(b.Enrolled * 100.0 / b.Capacity) : 0;
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-semibold text-white">@b.BatchName</span>
+            <span class="text-xs text-gym-gray font-medium">@b.Enrolled / @b.Capacity <span class="text-[10px] uppercase ml-1">Enrolled</span></span>
+          </div>
+          <div class="progress-glass">
+            <div class="progress-bar-gradient @(pct > 80 ? "progress-bar-danger" : "")"
+                 style="width:@(Math.Min(pct, 100))%"></div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Recent Memberships -->
+<div class="glass-card">
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="text-xl font-oswald font-bold text-white tracking-wide">Recent Memberships</h3>
+    <a href="/Membership" class="text-xs font-bold uppercase tracking-wider text-gym-blue hover:text-white transition-colors flex items-center gap-2 bg-gym-blue/10 px-4 py-2 rounded-lg border border-gym-blue/20 hover:border-gym-blue/50">View all <i class="bi bi-arrow-right"></i></a>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="glass-table">
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Plan</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var m in Model.RecentMemberships)
+        {
+          var status = m.ComputedStatus;
+          var badgeCls = status == MembershipStatus.Active ? "badge-active"
+              : status == MembershipStatus.ExpiringSoon ? "badge-expiring"
+              : status == MembershipStatus.Expired ? "badge-expired"
+              : status == MembershipStatus.Suspended ? "badge-suspended"
+              : "badge-cancelled";
+          <tr>
+            <td>
+              <div class="flex items-center gap-4">
+                <div class="avatar w-10 h-10 text-sm">@m.Member?.FullName?.Substring(0, 1)</div>
+                <div>
+                  <div class="font-semibold text-white text-[15px]">@m.Member?.FullName</div>
+                  <div class="text-xs text-gym-gray tracking-wide">@m.Member?.MembershipNumber</div>
+                </div>
+              </div>
+            </td>
+            <td class="font-medium">@m.Plan?.PlanName</td>
+            <td class="text-gym-gray font-medium">@m.StartDate.ToString("MMM dd")</td>
+            <td class="text-gym-gray font-medium">@m.EndDate.ToString("MMM dd, yyyy")</td>
+            <td class="text-gym-green font-bold text-[15px]">$@m.FinalAmount.ToString("N2")</td>
+            <td><span class="badge-status @badgeCls">@status</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  // Global Chart config for God Level UI
+  Chart.defaults.color = '#9CA3AF';
+  Chart.defaults.font.family = 'Inter, sans-serif';
+
+  // Revenue Chart
+  const revLabels = [@Html.Raw(string.Join(",", Model.RevenueChart.Select(r => $"'{r.MonthName}'")))];
+  const revData = [@string.Join(",", Model.RevenueChart.Select(r => r.Revenue))];
+
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: revLabels,
+      datasets: [{
+        label: 'Revenue',
+        data: revData,
+        borderColor: '#00E5FF',
+        backgroundColor: 'rgba(0,229,255,0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#00E5FF',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10,10,15,0.9)',
+          titleFont: { size: 14, family: 'Oswald' },
+          bodyFont: { size: 14, weight: 'bold' },
+          padding: 12,
+          borderColor: 'rgba(0,229,255,0.3)',
+          borderWidth: 1
+        }
+      }
+    }
+  });
+
+  // Plan Distribution
+  const planLabels = [@Html.Raw(string.Join(",", Model.PlanDistribution.Select(p => $"'{p.PlanName}'")))];
+  const planData = [@string.Join(",", Model.PlanDistribution.Select(p => p.Count))];
+  
+  new Chart(document.getElementById('planChart'), {
+    type: 'doughnut',
+    data: {
+      labels: planLabels,
+      datasets: [{
+        data: planData,
+        backgroundColor: ['#00E5FF', '#8B5CF6', '#FF003C', '#FFB347'],
+        borderWidth: 0,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '75%',
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, pointStyle: 'circle' } }
+      }
+    }
+  });
+
+  // Attendance Chart
+  const attLabels = [@Html.Raw(string.Join(",", Model.AttendanceChart.Select(a => $"'{a.Date}'")))];
+  const attData = [@string.Join(",", Model.AttendanceChart.Select(a => a.Count))];
+  
+  new Chart(document.getElementById('attendanceChart'), {
+    type: 'bar',
+    data: {
+      labels: attLabels,
+      datasets: [{
+        label: 'Check-Ins',
+        data: attData,
+        backgroundColor: 'rgba(139,92,246,0.8)',
+        hoverBackgroundColor: '#8B5CF6',
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+}

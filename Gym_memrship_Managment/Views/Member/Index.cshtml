@@ -1,0 +1,124 @@
+﻿@model MemberListVm
+@{
+  ViewData["Title"] = "Members";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Members</h1>
+    <p class="page-subtitle">@Model.TotalCount members total</p>
+  </div>
+  <a href="/Member/Create" class="btn-gradient-blue"><i class="bi bi-person-plus-fill"></i> Add Member</a>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="glass-card" style="margin-bottom:16px;padding:14px 20px">
+  <form method="get" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <div class="search-bar">
+      <i class="bi bi-search" style="color:#5c5875"></i>
+      <input type="text" name="search" value="@Model.SearchTerm"
+             placeholder="Search by name, phone, ID..." />
+    </div>
+    <select name="status" class="form-control-dark" style="width:160px">
+      <option value="">All Statuses</option>
+      @foreach (var s in Enum.GetValues<MemberStatus>())
+      {
+        <option value="@s" selected="@(Model.StatusFilter == s.ToString() ? "selected" : null)">@s</option>
+      }
+    </select>
+    <button type="submit" class="btn-gradient-blue">Filter</button>
+    @if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.StatusFilter))
+    {
+      <a href="/Member" class="btn-outline-glass">Clear</a>
+    }
+  </form>
+</div>
+
+<!-- Members Table -->
+<div class="glass-card" style="padding:0;overflow:hidden">
+  <table class="glass-table">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Membership #</th>
+        <th>Phone</th>
+        <th>Join Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (!Model.Members.Any())
+      {
+        <tr>
+          <td colspan="6" style="text-align:center;padding:40px;color:#5c5875">
+            <i class="bi bi-people" style="font-size:36px;display:block;margin-bottom:12px"></i>
+            No members found
+          </td>
+        </tr>
+      }
+      @foreach (var m in Model.Members)
+      {
+        var badgeCls = m.Status == MemberStatus.Active ? "badge-active"
+            : m.Status == MemberStatus.Suspended ? "badge-suspended"
+            : m.Status == MemberStatus.Blacklisted ? "badge-cancelled"
+            : "badge-inactive";
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="avatar">@m.FullName.Substring(0, 1)</div>
+              <div>
+                <div style="font-weight:500">@m.FullName</div>
+                <div style="font-size:11px;color:#5c5875">@m.Email</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:12px;color:#9994AA;font-family:monospace">@m.MembershipNumber</td>
+          <td style="color:#9994AA">@m.Phone</td>
+          <td style="color:#9994AA">@m.JoinDate.ToString("MMM dd, yyyy")</td>
+          <td><span class="badge-status @badgeCls">@m.Status</span></td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="/Member/Details/@m.MemberId" class="btn-outline-glass" style="padding:5px 10px;font-size:12px">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="/Member/Edit/@m.MemberId" class="btn-outline-glass" style="padding:5px 10px;font-size:12px">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="/Membership/Enroll?memberId=@m.MemberId" class="btn-outline-glass" style="padding:5px 10px;font-size:12px" title="Enroll">
+                <i class="bi bi-card-checklist"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+  <div style="display:flex;justify-content:center;margin-top:16px">
+    <div class="pagination-glass">
+      @if (Model.CurrentPage > 1)
+      {
+        <a href="?search=@Model.SearchTerm&status=@Model.StatusFilter&page=@(Model.CurrentPage - 1)" class="page-btn">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      }
+      @for (var i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+      {
+        <a href="?search=@Model.SearchTerm&status=@Model.StatusFilter&page=@i"
+           class="page-btn @(i == Model.CurrentPage ? "active" : "")">@i</a>
+      }
+      @if (Model.CurrentPage < Model.TotalPages)
+      {
+        <a href="?search=@Model.SearchTerm&status=@Model.StatusFilter&page=@(Model.CurrentPage + 1)" class="page-btn">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      }
+    </div>
+  </div>
+}

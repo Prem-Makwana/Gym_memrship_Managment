@@ -1,0 +1,111 @@
+﻿@model EnrollVm
+@{
+  ViewData["Title"] = "Enroll Member";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Enroll Member</h1></div>
+  <a href="/Member/Details/@Model.MemberId" class="btn-outline-glass"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+@if (Model.Member != null)
+{
+  <div class="glass-card" style="margin-bottom:16px;display:flex;align-items:center;gap:12px">
+    <div class="avatar" style="width:44px;height:44px;font-size:18px">@Model.Member.FullName.Substring(0, 1)</div>
+    <div>
+      <div style="font-weight:600;font-size:16px">@Model.Member.FullName</div>
+      <div style="font-size:12px;color:#9994AA">@Model.Member.MembershipNumber • @Model.Member.Phone</div>
+    </div>
+  </div>
+}
+
+<form asp-action="Enroll" asp-controller="Membership" method="post" class="form-glass">
+  @Html.AntiForgeryToken()
+  <input asp-for="MemberId" type="hidden" />
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div style="grid-column:span 2">
+      <label class="form-label-dark">Membership Plan *</label>
+      <select asp-for="PlanId" class="form-control-dark" style="width:100%" required id="plan-select">
+        <option value="">Select a plan...</option>
+        @foreach (var p in Model.Plans)
+        {
+          <option value="@p.PlanId" data-price="@p.Price" data-reg="@p.RegistrationFee" data-days="@p.DurationInDays">
+            @p.PlanName — ₹@p.Price.ToString("N2") / @p.DurationInDays days
+          </option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="form-label-dark">Start Date *</label>
+      <input asp-for="StartDate" type="date" class="form-control-dark" style="width:100%" required id="start-date" />
+    </div>
+    <div>
+      <label class="form-label-dark">Discount (₹)</label>
+      <input asp-for="Discount" type="number" step="0.01" class="form-control-dark" style="width:100%" min="0" oninput="recalc()" />
+    </div>
+    <div>
+      <label class="form-label-dark">Payment Method</label>
+      <select asp-for="PaymentMethod" class="form-control-dark" style="width:100%">
+        @foreach (var m in Enum.GetValues<PaymentMethod>()) { <option value="@m">@m</option> }
+      </select>
+    </div>
+    <div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:16px">
+        <div style="font-size:12px;color:#5c5875;margin-bottom:8px">SUMMARY</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:#9994AA">Plan Price</span><span id="plan-price">-</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:#9994AA">Registration Fee</span><span id="reg-fee">-</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="color:#FFB347">Discount</span><span id="discount-amt" style="color:#FFB347">-</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px;font-weight:700">
+          <span>Total</span><span id="total-amt" style="color:#00FF88">-</span>
+        </div>
+        <div style="font-size:12px;color:#9994AA;margin-top:8px" id="end-date-display"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
+    <a href="/Member/Details/@Model.MemberId" class="btn-outline-glass">Cancel</a>
+    <button type="submit" class="btn-gradient-blue"><i class="bi bi-card-checklist"></i> Enroll & Pay</button>
+  </div>
+</form>
+
+@section Scripts {
+<script>
+  const planSelect = document.getElementById('plan-select');
+  const startDateInput = document.getElementById('start-date');
+  const discountInput = document.querySelector('[name="Discount"]');
+
+  function recalc() {
+    const opt = planSelect.options[planSelect.selectedIndex];
+    if (!opt.value) return;
+    const price = parseFloat(opt.dataset.price || 0);
+    const reg = parseFloat(opt.dataset.reg || 0);
+    const days = parseInt(opt.dataset.days || 0);
+    const discount = parseFloat(discountInput?.value || 0);
+    const total = Math.max(0, price + reg - discount);
+
+    document.getElementById('plan-price').textContent = '₹' + price.toFixed(2);
+    document.getElementById('reg-fee').textContent = '₹' + reg.toFixed(2);
+    document.getElementById('discount-amt').textContent = '-₹' + discount.toFixed(2);
+    document.getElementById('total-amt').textContent = '₹' + total.toFixed(2);
+
+    if (startDateInput.value) {
+      const endDate = new Date(startDateInput.value);
+      endDate.setDate(endDate.getDate() + days);
+      document.getElementById('end-date-display').textContent = 'Valid until: ' + endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  }
+
+  planSelect.addEventListener('change', recalc);
+  startDateInput.addEventListener('change', recalc);
+  recalc();
+</script>
+}

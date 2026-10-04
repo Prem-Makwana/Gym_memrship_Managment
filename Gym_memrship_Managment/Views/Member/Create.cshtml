@@ -1,0 +1,84 @@
+﻿@model MemberCreateVm
+@{
+  ViewData["Title"] = "Add Member";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Add Member</h1>
+    <p class="page-subtitle">Create a new gym member profile</p>
+  </div>
+  <a href="/Member" class="btn-outline-glass"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<form asp-action="Create" asp-controller="Member" method="post" class="form-glass">
+  @Html.AntiForgeryToken()
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <label class="form-label-dark">Full Name *</label>
+      <input asp-for="FullName" class="form-control-dark" style="width:100%" placeholder="John Smith" required maxlength="100" />
+      <span asp-validation-for="FullName" style="color:#FF006E;font-size:12px"></span>
+    </div>
+    <div>
+      <label class="form-label-dark">Gender *</label>
+      <select asp-for="Gender" class="form-control-dark" style="width:100%">
+        @foreach (var g in Enum.GetValues<Gender>())
+        { <option value="@g">@g</option> }
+      </select>
+    </div>
+    <div>
+      <label class="form-label-dark">Date of Birth</label>
+      <input asp-for="DateOfBirth" type="date" class="form-control-dark" style="width:100%" />
+    </div>
+    <div>
+      <label class="form-label-dark">Phone *</label>
+      <input asp-for="Phone" class="form-control-dark" style="width:100%" placeholder="5551234567" required maxlength="15" />
+    </div>
+    <div>
+      <label class="form-label-dark">Email *</label>
+      <input asp-for="Email" type="email" class="form-control-dark" style="width:100%" placeholder="john@example.com" required />
+    </div>
+    <div>
+      <label class="form-label-dark">Address</label>
+      <input asp-for="Address" class="form-control-dark" style="width:100%" placeholder="123 Main St" />
+    </div>
+    <div>
+      <label class="form-label-dark">Emergency Contact Name</label>
+      <input asp-for="EmergencyContactName" class="form-control-dark" style="width:100%" placeholder="Jane Smith" />
+    </div>
+    <div>
+      <label class="form-label-dark">Emergency Contact Phone</label>
+      <input asp-for="EmergencyContactPhone" class="form-control-dark" style="width:100%" placeholder="5559876543" />
+    </div>
+    <div style="grid-column:span 2">
+      <hr style="border-color:rgba(255,255,255,0.08);margin:8px 0" />
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:#9994AA;margin-bottom:16px">
+        <input asp-for="CreateUserAccount" type="checkbox" style="width:16px;height:16px" />
+        <span>Create user account (allows member to log in)</span>
+      </label>
+    </div>
+    <div id="password-field">
+      <label class="form-label-dark">Password *</label>
+      <input asp-for="Password" type="password" class="form-control-dark" style="width:100%" placeholder="Min 8 chars, 1 upper, 1 number, 1 symbol" />
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:28px;justify-content:flex-end">
+    <a href="/Member" class="btn-outline-glass">Cancel</a>
+    <button type="submit" class="btn-gradient-blue">
+      <i class="bi bi-person-plus-fill"></i> Create Member
+    </button>
+  </div>
+</form>
+
+@section Scripts {
+<script>
+  const checkbox = document.querySelector('[name="CreateUserAccount"]');
+  const passwordField = document.getElementById('password-field');
+  checkbox?.addEventListener('change', () => {
+    passwordField.style.display = checkbox.checked ? '' : 'none';
+  });
+  if (!checkbox?.checked) passwordField.style.display = 'none';
+</script>
+}

@@ -1,0 +1,128 @@
+﻿@model IEnumerable<Gym_memrship_Managment.Models.PTBooking>
+
+@{
+    ViewData["Title"] = "My PT Bookings";
+}
+
+<div class="max-w-6xl mx-auto space-y-8 animate-fade-in">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+        <div>
+            <h1 class="text-4xl font-oswald font-bold uppercase tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gym-blue to-gym-purple">
+                My Bookings
+            </h1>
+            <p class="text-gym-gray mt-2">Manage your Personal Training sessions</p>
+        </div>
+        <a href="/Booking/BookTrainer" class="px-6 py-3 bg-gradient-to-r from-gym-blue to-blue-600 rounded-xl font-bold uppercase tracking-wider text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] transition-all duration-300 hover:-translate-y-1">
+            <i class="bi bi-plus-lg mr-2"></i> Book New Session
+        </a>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="bg-black/40 backdrop-blur-xl border  rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gym-purple/10 rounded-full blur-[80px] pointer-events-none"></div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-16">
+                <div class="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+                    <i class="bi bi-calendar-x text-4xl text-gym-gray"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">No Bookings Found</h3>
+                <p class="text-gym-gray mb-6">You don't have any personal training sessions scheduled.</p>
+                <a href="/Booking/BookTrainer" class="text-gym-blue hover:text-white transition-colors underline underline-offset-4">Browse Available Trainers</a>
+            </div>
+        }
+        else
+        {
+            <div class="grid gap-4 booking-cards">
+                @foreach (var booking in Model)
+                {
+                    <div class="group bg-white/5 border border-white/5 rounded-xl p-5 hover:bg-white/10 transition-all duration-300">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            
+                            <!-- Trainer Info -->
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gym-blue to-gym-purple flex items-center justify-center font-bold text-xl shadow-lg shrink-0">
+                                    @(booking.TrainerSlot.Trainer.FullName.Substring(0, 1).ToUpper())
+                                </div>
+                                <div>
+                                    <div class="font-bold text-lg">@booking.TrainerSlot.Trainer.FullName</div>
+                                    <div class="text-gym-gray text-sm">
+                                        <i class="bi bi-telephone mr-1"></i> @booking.TrainerSlot.Trainer.Phone
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Date & Time -->
+                            <div class="flex items-center gap-6 text-sm">
+                                <div class="bg-black/30 px-4 py-2 rounded-lg border border-white/5">
+                                    <div class="text-gym-gray text-xs mb-1 uppercase tracking-wider">Date</div>
+                                    <div class="font-medium">
+                                        <i class="bi bi-calendar2-event text-gym-blue mr-1"></i>
+                                        @booking.BookingDate.ToString("MMM dd, yyyy")
+                                    </div>
+                                </div>
+                                <div class="bg-black/30 px-4 py-2 rounded-lg border border-white/5">
+                                    <div class="text-gym-gray text-xs mb-1 uppercase tracking-wider">Time</div>
+                                    <div class="font-medium">
+                                        <i class="bi bi-clock text-gym-orange mr-1"></i>
+                                        @booking.TrainerSlot.StartTime.ToString("hh:mm tt") - @booking.TrainerSlot.EndTime.ToString("hh:mm tt")
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status & Actions -->
+                            <div class="flex items-center gap-4">
+                                @if (booking.Status == "Scheduled")
+                                {
+                                    <span class="px-3 py-1 bg-gym-blue/20 text-gym-blue border border-gym-blue/30 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        <i class="bi bi-calendar-check mr-1"></i> Upcoming
+                                    </span>
+                                    @if (booking.BookingDate > DateTime.UtcNow.Date || (booking.BookingDate == DateTime.UtcNow.Date && booking.TrainerSlot.StartTime > TimeOnly.FromDateTime(DateTime.UtcNow)))
+                                    {
+                                        <form asp-action="CancelBooking" asp-controller="Booking" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                            <input type="hidden" name="id" value="@booking.BookingId" />
+                                            <button type="submit" class="w-10 h-10 rounded-lg bg-gym-red/20 text-gym-red border border-gym-red/30 hover:bg-gym-red hover:text-white transition-all flex items-center justify-center tooltip" data-tip="Cancel Booking">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                }
+                                else if (booking.Status == "Cancelled")
+                                {
+                                    <span class="px-3 py-1 bg-gym-red/20 text-gym-red border border-gym-red/30 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        <i class="bi bi-x-circle mr-1"></i> Cancelled
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-3 py-1 bg-gym-gray/20 text-gym-gray border border-gym-gray/30 rounded-full text-xs font-bold uppercase tracking-wider">
+                                        @booking.Status
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            anime({
+                targets: '.booking-cards > div',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(100),
+                easing: 'easeOutExpo',
+                duration: 800
+            });
+        });
+    </script>
+}
+

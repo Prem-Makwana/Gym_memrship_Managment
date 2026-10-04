@@ -1,0 +1,78 @@
+@model List<Batch>
+@{
+  ViewData["Title"] = "Batches";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Batches</h1></div>
+  @if (User.IsInRole("Admin"))
+  {
+    <a href="/Batch/Create" class="btn-gradient-blue"><i class="bi bi-plus-lg"></i> New Batch</a>
+  }
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+  @foreach (var b in Model)
+  {
+    var occupancy = b.Enrollments.Count(e => e.Status == EnrollmentStatus.Active);
+    var pct = b.MaximumCapacity > 0 ? (int)(occupancy * 100.0 / b.MaximumCapacity) : 0;
+    var colorStyle = pct >= 90 ? "color:#FF006E" : pct >= 70 ? "color:#FFB347" : "color:#00FF88";
+    <div class="glass-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0;font-size:16px;font-weight:600">@b.BatchName</h3>
+          @if (b.Trainer != null)
+          { <div style="font-size:12px;color:#9994AA;margin-top:2px"><i class="bi bi-person-badge"></i> @b.Trainer.FullName</div> }
+        </div>
+        @if (!b.IsActive)
+        { <span class="badge-status badge-inactive">Inactive</span> }
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#9994AA;font-size:13px">
+        <i class="bi bi-clock"></i>
+        @b.StartTime.ToString("hh:mm tt") — @b.EndTime.ToString("hh:mm tt")
+      </div>
+
+      @if (!string.IsNullOrEmpty(b.Location))
+      {
+        <div style="font-size:12px;color:#9994AA;margin-bottom:12px"><i class="bi bi-geo-alt"></i> @b.Location</div>
+      }
+
+      @if (b.Schedules.Any())
+      {
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+          @foreach (var s in b.Schedules.OrderBy(s => s.DayOfWeek))
+          {
+            <span style="background:rgba(139,92,246,0.15);color:#8B5CF6;border:1px solid rgba(139,92,246,0.3);border-radius:4px;padding:2px 6px;font-size:10px;font-weight:600">
+              @s.DayOfWeek.ToString()[..3]
+            </span>
+          }
+        </div>
+      }
+
+      <!-- Occupancy Bar -->
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:12px;color:#9994AA">Occupancy</span>
+          <span style="font-size:12px;@colorStyle;font-weight:600">@occupancy / @b.MaximumCapacity</span>
+        </div>
+        <div class="progress-glass">
+          <div class="progress-bar-gradient @(pct > 80 ? "progress-bar-danger" : "")" style="width:@(Math.Min(pct,100))%"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px">
+        <a href="/Batch/BatchMembers/@b.BatchId" class="btn-outline-glass" style="flex:1;text-align:center;font-size:12px">
+          <i class="bi bi-people"></i> Members
+        </a>
+        @if (User.IsInRole("Admin"))
+        {
+          <a href="/Batch/Edit/@b.BatchId" class="btn-outline-glass" style="padding:6px 10px;font-size:12px">
+            <i class="bi bi-pencil"></i>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>

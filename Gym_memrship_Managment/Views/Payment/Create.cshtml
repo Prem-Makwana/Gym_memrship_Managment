@@ -1,0 +1,59 @@
+﻿@model Gym_memrship_Managment.Models.Payment
+@{
+    ViewData["Title"] = "Record Payment";
+}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card glassmorphism">
+            <div class="card-header border-0 bg-transparent pb-0">
+                <h3 class="text-neon-blue fw-bold"><i class="bi bi-cash-coin me-2"></i>Record Payment</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div class="mb-3">
+                        <label asp-for="MemberId" class="form-label text-light">Member</label>
+                        <select asp-for="MemberId" class="form-select glass-input" asp-items="ViewBag.Members">
+                            <option value="">-- Select Member --</option>
+                        </select>
+                        <span asp-validation-for="MemberId" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label text-light"></label>
+                        <input asp-for="Amount" class="form-control glass-input" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PaymentMethod" class="form-label text-light"></label>
+                        <select asp-for="PaymentMethod" class="form-select glass-input">
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="UPI">UPI</option>
+                            <option value="BankTransfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PaymentType" class="form-label text-light"></label>
+                        <select asp-for="PaymentType" class="form-select glass-input">
+                            <option value="MembershipFee">Membership Fee</option>
+                            <option value="RegistrationFee">Registration Fee</option>
+                            <option value="RenewalFee">Renewal Fee</option>
+                            <option value="LateFee">Late Fee</option>
+                            <option value="Fine">Fine</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="TransactionReference" class="form-label text-light"></label>
+                        <input asp-for="TransactionReference" class="form-control glass-input" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label text-light"></label>
+                        <textarea asp-for="Notes" class="form-control glass-input"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-neon">Record Payment</button>
+                    <a asp-action="Index" class="btn btn-outline-light ms-2">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

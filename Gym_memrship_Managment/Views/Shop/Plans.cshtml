@@ -1,0 +1,207 @@
+﻿@model List<Gym_memrship_Managment.Models.MembershipPlan>
+@{
+    ViewData["Title"] = "Buy Membership";
+    Layout = "_Layout";
+    var activeMembership = ViewBag.ActiveMembership as Gym_memrship_Managment.Models.Membership;
+}
+
+<div class="max-w-6xl mx-auto space-y-10 anime-container">
+    
+    <!-- Header -->
+    <div class="text-center py-6 anime-item opacity-0">
+        <div class="inline-flex items-center gap-3 bg-gym-blue/10 border border-gym-blue/30 rounded-full px-6 py-2 mb-4">
+            <i class="bi bi-shop text-gym-blue text-sm"></i>
+            <span class="text-gym-blue text-xs font-bold uppercase tracking-widest">Membership Store</span>
+        </div>
+        <h1 class="text-5xl font-oswald font-bold text-white tracking-wide mb-3" style="text-shadow: 0 0 40px rgba(0,229,255,0.3)">
+            CHOOSE YOUR <span class="gradient-text-blue">PLAN</span>
+        </h1>
+        <p class="text-gym-gray text-lg max-w-xl mx-auto">Unlock your potential. Select a plan and pay securely online with Stripe.</p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="glass-card border border-red-500/30 bg-red-500/10 text-red-300 flex items-center gap-3 anime-item opacity-0">
+            <i class="bi bi-exclamation-triangle-fill text-red-400 text-xl"></i>
+            <span>@TempData["Error"]</span>
+        </div>
+    }
+
+    @if (activeMembership != null)
+    {
+        <!-- Active Membership Banner -->
+        <div class="glass-card border border-gym-green/30 bg-gym-green/5 anime-item opacity-0">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-gym-green/20 flex items-center justify-center">
+                        <i class="bi bi-shield-check-fill text-gym-green text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-white font-bold text-lg">Active Membership: @activeMembership.Plan?.PlanName</div>
+                        <div class="text-gym-gray text-sm">Expires on <span class="text-gym-green font-semibold">@activeMembership.EndDate.ToString("MMMM dd, yyyy")</span> — @activeMembership.DaysRemaining days remaining</div>
+                    </div>
+                </div>
+                @if (activeMembership.DaysRemaining <= 14)
+                {
+                    <form asp-action="RenewCheckout" asp-route-membershipId="@activeMembership.MembershipId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-gradient-blue px-6 py-3 rounded-xl font-bold tracking-widest text-sm whitespace-nowrap animate-pulse">
+                            <i class="bi bi-arrow-repeat me-2"></i> RENEW NOW — ₹@activeMembership.Plan?.RenewalFee.ToString("N0")
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <span class="text-gym-gray text-sm italic">Renewal available when &lt;14 days remain</span>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Plan Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @{
+            var planColors = new[] { "gym-blue", "gym-purple", "gym-green", "gym-orange", "gym-red" };
+            var planIcons = new[] { "bi-star-fill", "bi-gem", "bi-lightning-charge-fill", "bi-fire", "bi-trophy-fill" };
+            int idx = 0;
+        }
+        @foreach (var plan in Model)
+        {
+            var color = planColors[idx % planColors.Length];
+            var icon = planIcons[idx % planIcons.Length];
+            var totalAmount = plan.Price + plan.RegistrationFee;
+            var isPopular = idx == 1; // Mark middle plan as popular
+            idx++;
+            
+            <div class="glass-card relative overflow-hidden group anime-item opacity-0 flex flex-col @(isPopular ? "border-gym-blue/50 shadow-[0_0_30px_rgba(0,229,255,0.1)]" : "")">
+                @if (isPopular)
+                {
+                    <div class="absolute top-4 right-4 bg-gym-blue text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider z-10">â­ Popular</div>
+                }
+                
+                <!-- Glow background -->
+                <div class="absolute inset-0 bg-gradient-to-br from-@color/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                
+                <!-- Plan Icon & Name -->
+                <div class="text-center mb-6 relative z-10">
+                    <div class="w-16 h-16 rounded-2xl bg-@color/15 border border-@color/30 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300" style="box-shadow: 0 0 20px rgba(0,229,255,0.1)">
+                        <i class="bi @icon text-@color text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-oswald font-bold text-white tracking-wide">@plan.PlanName</h2>
+                    @if (!string.IsNullOrEmpty(plan.Description))
+                    {
+                        <p class="text-gym-gray text-sm mt-1 leading-relaxed">@plan.Description</p>
+                    }
+                </div>
+
+                <!-- Price -->
+                <div class="text-center mb-6 relative z-10">
+                    <div class="text-5xl font-oswald font-bold text-white" style="text-shadow: 0 0 20px rgba(0,229,255,0.2)">
+                        <span class="text-2xl text-gym-gray font-normal">₹</span>@plan.Price.ToString("N0")
+                    </div>
+                    <div class="text-gym-gray text-xs mt-1 uppercase tracking-wider">for @plan.DurationInDays days</div>
+                    @if (plan.RegistrationFee > 0)
+                    {
+                        <div class="inline-flex items-center gap-1 mt-2 bg-gym-orange/10 border border-gym-orange/30 rounded-full px-3 py-1">
+                            <span class="text-gym-orange text-xs">+ ₹@plan.RegistrationFee.ToString("N0") registration</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Features list -->
+                <ul class="space-y-2 mb-8 flex-1 relative z-10">
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <i class="bi bi-check-circle-fill text-gym-green text-xs"></i>
+                        <span>@plan.DurationInDays days full access</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <i class="bi bi-check-circle-fill text-gym-green text-xs"></i>
+                        <span>QR Check-in system</span>
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-300">
+                        <i class="bi bi-check-circle-fill text-gym-green text-xs"></i>
+                        <span>@plan.GracePeriodDays-day grace period</span>
+                    </li>
+                    @if (plan.LateFeePerDay > 0)
+                    {
+                        <li class="flex items-center gap-3 text-sm text-gray-400">
+                            <i class="bi bi-info-circle text-gym-orange text-xs"></i>
+                            <span>Late fee: ₹@plan.LateFeePerDay/day after grace</span>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Total + Buy Button -->
+                <div class="relative z-10">
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <span class="text-gym-gray text-xs uppercase tracking-wide">Total today</span>
+                        <span class="text-white font-bold text-lg">₹@totalAmount.ToString("N0")</span>
+                    </div>
+                    
+                    @if (activeMembership == null)
+                    {
+                        <form asp-action="Checkout" asp-route-planId="@plan.PlanId" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full py-3.5 rounded-xl font-bold tracking-widest text-sm transition-all duration-300 @(isPopular ? "btn-gradient-blue" : "btn-outline-glass hover:bg-white/10")">
+                                <i class="bi bi-credit-card me-2"></i> BUY NOW — ₹@totalAmount.ToString("N0")
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button disabled class="w-full py-3.5 rounded-xl font-bold tracking-widest text-sm bg-white/5 text-gym-gray cursor-not-allowed border ">
+                            <i class="bi bi-lock-fill me-2"></i> Already Enrolled
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 anime-item opacity-0">
+            <i class="bi bi-shop-window text-6xl text-gym-gray mb-4 block"></i>
+            <p class="text-gym-gray text-lg">No plans are currently available. Check back soon!</p>
+        </div>
+    }
+
+    <!-- Stripe Trust Badge -->
+    <div class="text-center anime-item opacity-0 pb-6">
+        <div class="inline-flex flex-wrap items-center justify-center gap-4 glass-card px-8 py-4 rounded-2xl">
+            <i class="bi bi-shield-lock-fill text-gym-green text-lg"></i>
+            <span class="text-gym-gray text-sm">Payments secured by</span>
+            <span class="text-white font-bold tracking-wide">Stripe</span>
+            <span class="text-gym-gray text-sm">Â·</span>
+            <i class="bi bi-credit-card-2-front-fill text-gym-blue text-lg"></i>
+            <span class="text-gym-gray text-sm">Visa, Mastercard, UPI, Rupay accepted</span>
+            <span class="text-gym-gray text-sm">Â·</span>
+            <i class="bi bi-arrow-left-right text-gym-orange text-lg"></i>
+            <span class="text-gym-gray text-sm">No data stored on our servers</span>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '.anime-item',
+                    translateY: [30, 0],
+                    opacity: [0, 1],
+                    delay: anime.stagger(150, {start: 300}),
+                    easing: 'easeOutExpo',
+                    duration: 1000
+                });
+            } else {
+                document.querySelectorAll('.anime-item').forEach(el => {
+                    el.classList.remove('opacity-0');
+                    el.style.opacity = 1;
+                });
+            }
+        });
+    </script>
+}
+

@@ -1,0 +1,230 @@
+@model CheckInVm
+@{
+  ViewData["Title"] = "Attendance Check-In";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Quick Check-In</h1>
+    <p class="page-subtitle">Search member by name, ID, or phone</p>
+  </div>
+  <a href="/Attendance/History" class="btn-outline-glass"><i class="bi bi-clock-history"></i> History</a>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <!-- Search Panel -->
+  <div>
+    <div class="glass-card" style="margin-bottom:16px">
+      <h3 style="margin:0 0 16px;font-size:15px;font-weight:600;color:#00D4FF">
+        <i class="bi bi-search"></i> Member Lookup
+      </h3>
+
+      <div class="search-bar" style="width:100%;margin-bottom:12px">
+        <i class="bi bi-search" style="color:#5c5875"></i>
+        <input type="text" id="search-input" placeholder="Enter Member ID, name, or phone..."
+               style="width:100%" oninput="debounceSearch(this.value)" />
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label class="form-label-dark">Batch (optional)</label>
+        <select id="batch-select" class="form-control-dark" style="width:100%" onchange="loadBatchMembers(this.value)">
+          <option value="">No Batch</option>
+          @foreach (var b in Model.Batches)
+          {
+            <option value="@b.BatchId">@b.BatchName (@b.StartTime.ToString("hh:mm tt"))</option>
+          }
+        </select>
+      </div>
+
+      <div id="member-result" class="d-none"></div>
+      
+      <!-- New Batch Members Container -->
+      <div id="batch-members-container" class="mt-4 flex flex-col gap-2 d-none"></div>
+    </div>
+
+    <!-- Today's Stats -->
+    <div class="glass-card overflow-hidden relative group">
+      <div class="absolute inset-0 bg-gradient-to-br from-gym-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      <h3 class="flex items-center gap-2 m-0 mb-4 text-sm font-semibold text-gym-gray">
+        <i class="bi bi-bar-chart-fill text-gym-blue"></i> Today's Stats
+      </h3>
+      <div id="today-stats" class="grid grid-cols-2 gap-4">
+        <div class="stat-box p-3 rounded-xl bg-white/5 border border-white/5">
+          <div class="text-[11px] text-gym-gray uppercase tracking-wider mb-1">Total Today</div>
+          <div id="stat-total" class="text-2xl font-bold text-white">--</div>
+        </div>
+        <div class="stat-box p-3 rounded-xl bg-white/5 border border-white/5">
+          <div class="text-[11px] text-gym-gray uppercase tracking-wider mb-1">Active Now</div>
+          <div id="stat-active" class="text-2xl font-bold text-gym-green">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Check-Ins (live) -->
+  <div class="glass-card">
+    <h3 style="margin:0 0 16px;font-size:15px;font-weight:600">
+      <i class="bi bi-activity" style="color:#00FF88"></i> Live Feed
+    </h3>
+    <div id="live-feed" style="display:flex;flex-direction:column;gap:8px">
+      <p style="color:#5c5875;font-size:13px">No check-ins today yet</p>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+  let debounceTimer;
+  function debounceSearch(val) {
+    clearTimeout(debounceTimer);
+    if (val.length < 2) {
+      document.getElementById('member-result').classList.add('d-none');
+      return;
+    }
+    debounceTimer = setTimeout(() => searchByTerm(val), 400);
+  }
+
+  async function searchByTerm(term) {
+    // Try to parse as member ID
+    const idMatch = term.match(/^\d+$/);
+    if (idMatch) {
+      await CheckIn.searchMember(parseInt(term));
+    } else {
+      // Search by name/phone
+      try {
+        const res = await fetch(`/Member/Search?term=${encodeURIComponent(term)}`);
+        const members = await res.json();
+        const resultEl = document.getElementById('member-result');
+
+        if (members.length === 0) {
+          resultEl.innerHTML = `<div class="alert-glass alert-danger-glass">No members found for "${term}"</div>`;
+          resultEl.classList.remove('d-none');
+          return;
+        }
+        if (members.length === 1) {
+          await CheckIn.searchMember(members[0].memberId);
+          return;
+        }
+
+        // Show list
+        resultEl.innerHTML = members.map(m => `
+          <div class="glass-card" style="padding:12px;cursor:pointer;margin-bottom:6px"
+               onclick="CheckIn.searchMember(${m.memberId})">
+            <div style="font-weight:500">${m.fullName}</div>
+            <div style="font-size:11px;color:#9994AA">${m.membershipNumber} • ${m.phone}</div>
+          </div>
+        `).join('');
+        resultEl.classList.remove('d-none');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  async function loadLiveFeed() {
+    try {
+      const [feedRes, statsRes] = await Promise.all([
+        fetch('/Attendance/GetLiveFeed?date=' + new Date().toISOString().split('T')[0]),
+        fetch('/Attendance/GetTodayStats')
+      ]);
+      const data = await feedRes.json();
+      const stats = await statsRes.json();
+
+      document.getElementById('stat-total').innerText = stats.total;
+      document.getElementById('stat-active').innerText = stats.active;
+
+      const feed = document.getElementById('live-feed');
+      if (!data.length) {
+        feed.innerHTML = '<p style="color:#5c5875;font-size:13px">No check-ins today yet</p>';
+        return;
+      }
+
+      feed.innerHTML = data.slice(0, 15).map(a => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="avatar" style="width:28px;height:28px;font-size:11px">${a.memberName.charAt(0)}</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">${a.memberName}</div>
+              <div style="font-size:11px;color:#9994AA">${a.membershipNumber}</div>
+            </div>
+          </div>
+          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+            <div style="font-size:12px;color:#9994AA">${new Date(a.checkInTime).toLocaleTimeString()}</div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <span class="badge-status ${a.checkOutTime ? 'badge-paid' : 'badge-active'}" style="font-size:10px">
+                ${a.checkOutTime ? 'Out' : 'In'}
+              </span>
+              ${!a.checkOutTime ? `<button onclick="CheckIn.checkout(${a.attendanceId}); setTimeout(loadLiveFeed, 300);" class="btn-outline-glass" style="padding: 2px 8px; font-size: 10px;"><i class="bi bi-box-arrow-right"></i> Out</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) { console.error('Failed to load feed:', e); }
+  }
+
+  async function loadBatchMembers(batchId) {
+    const container = document.getElementById('batch-members-container');
+    if (!batchId) {
+      container.classList.add('d-none');
+      container.innerHTML = '';
+      return;
+    }
+
+    try {
+      const res = await fetch(`/Attendance/GetBatchMembers?batchId=${batchId}`);
+      const members = await res.json();
+
+      if (members.length === 0) {
+        container.innerHTML = `<div class="text-sm text-gym-gray p-2">No active members in this batch.</div>`;
+        container.classList.remove('d-none');
+        return;
+      }
+
+      container.innerHTML = members.map((m, i) => `
+        <div class="batch-member-card glass-card flex items-center justify-between p-3 rounded-xl border border-white/5 opacity-0">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-gym-blue/20 to-transparent flex items-center justify-center text-gym-blue font-bold text-xs border border-gym-blue/20">
+              ${m.fullName.charAt(0)}
+            </div>
+            <div>
+              <div class="text-sm font-semibold text-white">${m.fullName}</div>
+              <div class="text-[10px] text-gym-gray">${m.membershipNumber}</div>
+            </div>
+          </div>
+          <button class="btn-primary text-xs px-3 py-1.5 rounded-lg" onclick="CheckIn.doCheckIn(${m.memberId})">
+            Check In
+          </button>
+        </div>
+      `).join('');
+      
+      container.classList.remove('d-none');
+
+      // Anime.js Staggered Animation
+      anime({
+        targets: '.batch-member-card',
+        translateY: [20, 0],
+        opacity: [0, 1],
+        delay: anime.stagger(100),
+        duration: 800,
+        easing: 'easeOutElastic(1, .8)'
+      });
+
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  // Intercept doCheckIn to instantly refresh stats and feed
+  const originalDoCheckIn = CheckIn.doCheckIn;
+  CheckIn.doCheckIn = async function(memberId) {
+    await originalDoCheckIn.call(CheckIn, memberId);
+    loadLiveFeed();
+  };
+
+  loadLiveFeed();
+  setInterval(loadLiveFeed, 15000);
+</script>
+}

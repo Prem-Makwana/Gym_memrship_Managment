@@ -1,0 +1,46 @@
+@model IEnumerable<Gym_memrship_Managment.Models.Payment>
+@{
+    ViewData["Title"] = "Payment Ledger";
+}
+<div class="card glassmorphism">
+    <div class="card-header border-0 bg-transparent pb-0">
+        <h3 class="text-neon-blue fw-bold"><i class="bi bi-journal-text me-2"></i>Ledger - @ViewBag.MemberName</h3>
+        <p class="text-light-50">Transaction history</p>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <a asp-action="Create" asp-route-memberId="@ViewBag.MemberId" class="btn btn-neon-purple"><i class="bi bi-plus-circle"></i> Record Payment</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table text-light">
+                <thead>
+                    <tr>
+                        <th>Receipt #</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Type</th>
+                        <th>Reference</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.ReceiptNumber</td>
+                            <td>@item.PaymentDate.ToString("d")</td>
+                            <td class="text-neon-green fw-bold">@item.Amount.ToString("C")</td>
+                            <td>@item.PaymentMethod</td>
+                            <td>@item.PaymentType</td>
+                            <td>@item.TransactionReference</td>
+                            <td>
+                                <a asp-action="Receipt" asp-route-id="@item.PaymentId" class="btn btn-sm btn-outline-info">Receipt</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

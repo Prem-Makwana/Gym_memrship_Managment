@@ -1,0 +1,580 @@
+﻿@model Gym_memrship_Managment.ViewModels.LoginVm
+@{
+  ViewData["Title"] = "Access Terminal";
+  Layout = "_Layout";
+}
+
+<style>
+  /* =====================================================
+     PURE CSS 3D IMMERSIVE LOGIN ANIMATION
+     No JS dependency. Works instantly on page load.
+  ===================================================== */
+
+  @@keyframes card-3d-reveal {
+    0%   { opacity:0; transform: perspective(1200px) rotateY(90deg) rotateX(20deg) translateZ(-400px) scale(0.5); filter: blur(20px); }
+    40%  { opacity:1; transform: perspective(1200px) rotateY(-8deg) rotateX(5deg) translateZ(30px) scale(1.02); filter: blur(0); }
+    60%  { transform: perspective(1200px) rotateY(4deg) rotateX(-3deg) translateZ(15px) scale(1.0); }
+    80%  { transform: perspective(1200px) rotateY(-2deg) rotateX(1deg) translateZ(5px); }
+    100% { opacity:1; transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateZ(0px) scale(1); }
+  }
+
+  @@keyframes item-slide-up {
+    0%   { opacity: 0; transform: translateY(50px) translateZ(-60px) scale(0.9); filter: blur(8px); }
+    100% { opacity: 1; transform: translateY(0) translateZ(0px) scale(1);   filter: blur(0); }
+  }
+
+  @@keyframes logo-drop {
+    0%   { opacity: 0; transform: translateY(-80px) scale(0.3) rotate(-20deg); filter: blur(12px); }
+    60%  { opacity: 1; transform: translateY(8px) scale(1.1) rotate(3deg); filter: blur(0); }
+    80%  { transform: translateY(-4px) scale(0.97) rotate(-1deg); }
+    100% { transform: translateY(0) scale(1) rotate(0deg); }
+  }
+
+  @@keyframes float-idle {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33%       { transform: translateY(-6px) rotate(1deg); }
+    66%       { transform: translateY(-3px) rotate(-1deg); }
+  }
+
+  @@keyframes shimmer-slide {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  @@keyframes orb-spin-1 {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0.15; }
+    33%  { transform: translate(60px, -80px) scale(1.3); opacity: 0.25; }
+    66%  { transform: translate(-40px, 40px) scale(0.8); opacity: 0.12; }
+    100% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+  }
+
+  @@keyframes orb-spin-2 {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0.1; }
+    50%  { transform: translate(-70px, 60px) scale(1.4); opacity: 0.2; }
+    100% { transform: translate(0, 0) scale(1); opacity: 0.1; }
+  }
+
+  @@keyframes orb-spin-3 {
+    0%   { transform: translate(0,0) scale(1); opacity: 0.08; }
+    40%  { transform: translate(50px, 80px) scale(0.7); opacity: 0.18; }
+    100% { transform: translate(0,0) scale(1); opacity: 0.08; }
+  }
+
+  @@keyframes particle-rise {
+    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+    20%  { opacity: 1; }
+    80%  { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-120px) translateX(30px) scale(1.5); }
+  }
+
+  @@keyframes border-glow-pulse {
+    0%, 100% { box-shadow: 0 0 0px rgba(0,229,255,0), inset 0 0 0px rgba(0,229,255,0); border-color: rgba(255,255,255,0.06); }
+    50%       { box-shadow: 0 0 30px rgba(0,229,255,0.15), inset 0 0 20px rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.3); }
+  }
+
+  @@keyframes scan-line {
+    0%   { top: -5%; opacity: 0; }
+    10%  { opacity: 0.4; }
+    90%  { opacity: 0.4; }
+    100% { top: 105%; opacity: 0; }
+  }
+
+  @@keyframes btn-pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.2), 0 0 30px rgba(0,229,255,0.05); }
+    50%       { box-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 60px rgba(139,92,246,0.25); }
+  }
+
+  /* Main card */
+  .login-card-3d {
+    animation: card-3d-reveal 1.4s cubic-bezier(0.23, 1.1, 0.32, 1) forwards;
+    transform-style: preserve-3d;
+    position: relative;
+    animation-fill-mode: forwards;
+  }
+
+  /* Logo */
+  .login-logo-anim {
+    animation: logo-drop 0.9s cubic-bezier(0.22,1.2,0.36,1) 0.5s both;
+  }
+
+  .login-logo-float {
+    animation: float-idle 5s ease-in-out 1.5s infinite;
+  }
+
+  /* Field rows stagger */
+  .login-item-1 { animation: item-slide-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.85s both; }
+  .login-item-2 { animation: item-slide-up 0.7s cubic-bezier(0.22,1,0.36,1) 1.0s both; }
+  .login-item-3 { animation: item-slide-up 0.7s cubic-bezier(0.22,1,0.36,1) 1.15s both; }
+  .login-item-4 { animation: item-slide-up 0.7s cubic-bezier(0.22,1,0.36,1) 1.3s both; }
+  .login-item-5 { animation: item-slide-up 0.7s cubic-bezier(0.22,1,0.36,1) 1.45s both; }
+
+  /* Card border breathing */
+  .card-border-glow {
+    animation: border-glow-pulse 3s ease-in-out 2s infinite;
+  }
+
+  /* Shimmer sweep */
+  .card-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.06) 50%, transparent 80%);
+    animation: shimmer-slide 4s ease-in-out 1.8s infinite;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 50;
+  }
+
+  /* Scan line effect */
+  .card-scan::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.4), transparent);
+    animation: scan-line 3.5s linear 1.5s infinite;
+    z-index: 60;
+    pointer-events: none;
+    border-radius: 999px;
+  }
+
+  /* Ambient orbs */
+  .login-orb-1 { animation: orb-spin-1 10s ease-in-out infinite; }
+  .login-orb-2 { animation: orb-spin-2 14s ease-in-out 2s infinite; }
+  .login-orb-3 { animation: orb-spin-3 8s ease-in-out 1s infinite; }
+
+  /* Particles */
+  .login-particle { animation: particle-rise linear infinite; }
+
+  /* Submit button glow */
+  .submit-btn-glow {
+    animation: btn-pulse-glow 2.5s ease-in-out 2s infinite;
+  }
+
+  /* Interactive tilt on hover */
+  .login-card-3d {
+    transition: transform 0.2s ease;
+  }
+  .login-card-outer:hover .login-card-3d {
+    box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 0 60px rgba(0,229,255,0.08);
+  }
+</style>
+
+<!-- FULL-PAGE 3D LOGIN SCENE -->
+<div class="min-h-screen flex items-center justify-center p-4 relative z-10 overflow-hidden login-card-outer" style="perspective: 1500px;">
+
+  <!-- Dynamic floating orbs background -->
+  <div class="absolute inset-0 pointer-events-none overflow-hidden">
+    <div class="login-orb-1 absolute top-[10%] left-[15%] w-[420px] h-[420px] rounded-full bg-[#00E5FF] opacity-[0.15] blur-[130px]"></div>
+    <div class="login-orb-2 absolute bottom-[5%] right-[10%] w-[500px] h-[500px] rounded-full bg-[#8B5CF6] opacity-[0.12] blur-[140px]"></div>
+    <div class="login-orb-3 absolute top-[50%] left-[55%] w-[300px] h-[300px] rounded-full bg-[#FF4D00] opacity-[0.08] blur-[100px]"></div>
+
+    <!-- Floating particles -->
+    <div class="login-particle absolute" style="left:12%; bottom:15%; width:3px; height:3px; border-radius:50%; background:#00E5FF; opacity:0.6; animation-duration:5s; animation-delay:0s; box-shadow:0 0 6px #00E5FF;"></div>
+    <div class="login-particle absolute" style="left:25%; bottom:20%; width:2px; height:2px; border-radius:50%; background:#8B5CF6; opacity:0.7; animation-duration:7s; animation-delay:1.5s; box-shadow:0 0 6px #8B5CF6;"></div>
+    <div class="login-particle absolute" style="left:75%; bottom:10%; width:4px; height:4px; border-radius:50%; background:#00E5FF; opacity:0.5; animation-duration:6s; animation-delay:0.8s; box-shadow:0 0 8px #00E5FF;"></div>
+    <div class="login-particle absolute" style="left:85%; bottom:30%; width:2px; height:2px; border-radius:50%; background:#FF4D00; opacity:0.6; animation-duration:9s; animation-delay:2s; box-shadow:0 0 6px #FF4D00;"></div>
+    <div class="login-particle absolute" style="left:40%; bottom:5%; width:3px; height:3px; border-radius:50%; background:#8B5CF6; opacity:0.5; animation-duration:8s; animation-delay:3s; box-shadow:0 0 6px #8B5CF6;"></div>
+    <div class="login-particle absolute" style="left:60%; bottom:25%; width:2px; height:2px; border-radius:50%; background:#00E5FF; opacity:0.7; animation-duration:4s; animation-delay:1s; box-shadow:0 0 4px #00E5FF;"></div>
+    <div class="login-particle absolute" style="left:5%; bottom:40%; width:3px; height:3px; border-radius:50%; background:#39FF14; opacity:0.4; animation-duration:11s; animation-delay:0.5s; box-shadow:0 0 6px #39FF14;"></div>
+    <div class="login-particle absolute" style="left:92%; bottom:50%; width:2px; height:2px; border-radius:50%; background:#00E5FF; opacity:0.5; animation-duration:6.5s; animation-delay:4s; box-shadow:0 0 4px #00E5FF;"></div>
+
+    <!-- Grid lines -->
+    <svg class="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+          <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#00E5FF" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)" />
+    </svg>
+  </div>
+
+  <!-- THE CARD -->
+  <div class="login-card-3d card-border-glow card-shimmer card-scan w-full max-w-[430px] relative z-10 p-8 sm:p-10 border rounded-2xl backdrop-blur-2xl overflow-hidden"
+       style="background: linear-gradient(135deg, rgba(10,10,14,0.92) 0%, rgba(14,10,28,0.88) 100%); border-color: rgba(255,255,255,0.07);"
+       id="loginCard">
+
+    <!-- Top corner accent lines -->
+    <div class="absolute top-0 left-0 w-12 h-12 pointer-events-none" style="border-top: 2px solid rgba(0,229,255,0.5); border-left: 2px solid rgba(0,229,255,0.5); border-radius: 12px 0 0 0;"></div>
+    <div class="absolute top-0 right-0 w-12 h-12 pointer-events-none" style="border-top: 2px solid rgba(139,92,246,0.5); border-right: 2px solid rgba(139,92,246,0.5); border-radius: 0 12px 0 0;"></div>
+    <div class="absolute bottom-0 left-0 w-12 h-12 pointer-events-none" style="border-bottom: 2px solid rgba(139,92,246,0.4); border-left: 2px solid rgba(139,92,246,0.4); border-radius: 0 0 0 12px;"></div>
+    <div class="absolute bottom-0 right-0 w-12 h-12 pointer-events-none" style="border-bottom: 2px solid rgba(0,229,255,0.4); border-right: 2px solid rgba(0,229,255,0.4); border-radius: 0 0 12px 0;"></div>
+
+    <!-- LOGO -->
+    <div class="login-logo-anim login-logo-float text-center mb-10 relative z-10">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 relative"
+           style="background: linear-gradient(135deg, rgba(0,229,255,0.15) 0%, rgba(139,92,246,0.15) 100%); border: 1px solid rgba(0,229,255,0.25); box-shadow: 0 0 30px rgba(0,229,255,0.2), inset 0 0 20px rgba(0,229,255,0.05);">
+        <div class="absolute inset-0 rounded-2xl" style="background: linear-gradient(135deg, rgba(0,229,255,0.06), transparent); animation: border-glow-pulse 2s ease-in-out infinite;"></div>
+        <i class="bi bi-lightning-charge-fill text-4xl relative z-10" style="color: #00E5FF; filter: drop-shadow(0 0 12px rgba(0,229,255,0.8)) drop-shadow(0 0 30px rgba(0,229,255,0.4));"></i>
+      </div>
+      <h1 class="text-3xl font-oswald font-bold m-0"
+          style="background: linear-gradient(90deg, #00E5FF 0%, #8B5CF6 50%, #FF4D00 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 20px rgba(0,229,255,0.3));">
+        FitZone Pro
+      </h1>
+      <p class="text-gray-500 mt-2 text-[10px] uppercase tracking-[0.3em] font-bold">âŸ¨ Access Terminal âŸ©</p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+      <div class="login-item-1 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6 text-sm flex items-start gap-3 backdrop-blur-md" style="box-shadow: 0 0 20px rgba(255,0,60,0.1);">
+        <i class="bi bi-exclamation-triangle-fill mt-0.5" style="filter: drop-shadow(0 0 5px rgba(255,0,60,0.5));"></i>
+        <div>
+        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+          <div class="font-medium">@err.ErrorMessage</div>
+        }
+        </div>
+      </div>
+    }
+
+    <form asp-action="Login" asp-controller="Account" method="post" class="space-y-6 relative z-10 no-loader">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+      <!-- Email -->
+      <div class="login-item-2 relative group">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <i class="bi bi-envelope text-gray-500 group-focus-within:text-[#00E5FF] transition-colors duration-300"></i>
+        </div>
+        <input type="email" name="Email" id="Email"
+               class="w-full text-white text-sm rounded-xl block pl-11 p-3.5 transition-all duration-300 focus:outline-none"
+               style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);"
+               onfocus="this.style.borderColor='rgba(0,229,255,0.5)'; this.style.boxShadow='0 0 20px rgba(0,229,255,0.1), inset 0 0 10px rgba(0,229,255,0.03)'"
+               onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.boxShadow='none'"
+               placeholder="admin@gym.com" required autocomplete="username" />
+        <label for="Email" class="absolute -top-2.5 left-3 px-2 text-[10px] font-bold tracking-wider rounded" style="background: #0A0A0E; color: #6b7280;">EMAIL</label>
+      </div>
+
+      <!-- Password -->
+      <div class="login-item-3 relative group">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <i class="bi bi-shield-lock text-gray-500 group-focus-within:text-[#00E5FF] transition-colors duration-300"></i>
+        </div>
+        <input type="password" name="Password" id="Password"
+               class="w-full text-white text-sm rounded-xl block pl-11 p-3.5 transition-all duration-300 focus:outline-none"
+               style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);"
+               onfocus="this.style.borderColor='rgba(0,229,255,0.5)'; this.style.boxShadow='0 0 20px rgba(0,229,255,0.1), inset 0 0 10px rgba(0,229,255,0.03)'"
+               onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.boxShadow='none'"
+               placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required autocomplete="current-password" />
+        <label for="Password" class="absolute -top-2.5 left-3 px-2 text-[10px] font-bold tracking-wider rounded" style="background: #0A0A0E; color: #6b7280;">PASSWORD</label>
+      </div>
+
+      <!-- Options -->
+      <div class="login-item-4 flex items-center justify-between pt-1">
+        <label class="flex items-center gap-2 cursor-pointer group">
+          <div class="relative flex items-center">
+            <input type="checkbox" name="RememberMe" class="peer sr-only" />
+            <div class="w-4 h-4 rounded border peer-checked:border-[#00E5FF] transition-all duration-200 flex items-center justify-center" style="border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.03);">
+              <i class="bi bi-check text-[#00E5FF] font-bold text-lg leading-none opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+            </div>
+          </div>
+          <span class="text-xs text-gray-500 group-hover:text-white transition-colors uppercase tracking-wider font-semibold">Remember Me</span>
+        </label>
+        <a href="#" class="text-xs font-semibold uppercase tracking-wider transition-colors" style="color: #00E5FF; text-shadow: 0 0 8px rgba(0,229,255,0.4);">Forgot Auth?</a>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit"
+              class="submit-btn-glow login-item-5 relative w-full overflow-hidden rounded-xl py-4 px-6 font-bold tracking-widest text-sm text-white transition-all duration-300 group"
+              style="background: linear-gradient(90deg, #00E5FF 0%, #8B5CF6 50%, #00E5FF 200%); background-size: 200%; transition: background-position 0.5s;"
+              onmouseover="this.style.backgroundPosition='100%'; this.style.transform='translateY(-2px) scale(1.01)'; this.style.filter='brightness(1.15)'"
+              onmouseout="this.style.backgroundPosition='0%'; this.style.transform=''; this.style.filter=''">
+        <span class="flex items-center justify-center gap-3">
+          <i class="bi bi-box-arrow-in-right text-lg"></i>
+          INITIALIZE SESSION
+        </span>
+      </button>
+    </form>
+
+    <!-- Demo Profiles -->
+    <div class="login-item-5 mt-8 pt-6 relative z-10" style="border-top: 1px solid rgba(255,255,255,0.05);">
+      <p class="text-center text-[10px] font-bold uppercase tracking-[0.3em] mb-4" style="color: rgba(156,163,175,0.5);">â€” Demo Access Profiles â€”</p>
+      <div class="grid grid-cols-3 gap-3">
+        @foreach (var cred in new[] {
+          new { Role = "Admin",  Email = "admin@gym.com",  Pass = "Admin@123!",  Icon = "bi-person-badge",     Color = "#FF003C" },
+          new { Role = "Staff",  Email = "staff@gym.com",  Pass = "Staff@123!",  Icon = "bi-person-workspace", Color = "#00E5FF" },
+          new { Role = "Member", Email = "member@gym.com", Pass = "Member@123!", Icon = "bi-person",            Color = "#FF4D00" }
+        })
+        {
+          <button type="button"
+                  onclick="document.getElementById('Email').value='@cred.Email'; document.getElementById('Password').value='@cred.Pass';"
+                  class="flex flex-col items-center justify-center gap-2 p-3 rounded-xl transition-all duration-300 group"
+                  style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);"
+                  onmouseover="this.style.borderColor='rgba(255,255,255,0.2)'; this.style.background='rgba(255,255,255,0.07)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'"
+                  onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'; this.style.background='rgba(255,255,255,0.02)'; this.style.transform=''; this.style.boxShadow=''">
+            <i class="bi @cred.Icon text-xl transition-transform group-hover:scale-125 duration-300" style="color: @cred.Color; filter: drop-shadow(0 0 6px @cred.Color);"></i>
+            <span class="text-[9px] font-bold text-gray-500 group-hover:text-white uppercase tracking-widest transition-colors">@cred.Role</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+/* ─── 3-D MOUSE TILT ─── */
+(function(){
+  var c=document.getElementById('loginCard'),o=c&&c.closest('.login-card-outer');
+  if(!c||!o)return;
+  var tx=0,ty=0,cx=0,cy=0;
+  o.addEventListener('mousemove',function(e){var r=o.getBoundingClientRect();ty=((e.clientX-r.left-r.width/2)/(r.width/2))*12;tx=-((e.clientY-r.top-r.height/2)/(r.height/2))*8;});
+  o.addEventListener('mouseleave',function(){tx=0;ty=0;});
+  (function t(){cx+=(tx-cx)*0.1;cy+=(ty-cy)*0.1;c.style.transform='perspective(1200px) rotateX('+cx.toFixed(2)+'deg) rotateY('+cy.toFixed(2)+'deg)';requestAnimationFrame(t);})();
+})();
+
+/* ════════════════════════════════════════════════════════
+   ★  ULTRA-PREMIUM 3D GLASS SLIDER + CYBER MATRIX REVEAL ★
+════════════════════════════════════════════════════════ */
+(function(){
+  var form = document.querySelector('form');
+  if(!form) return;
+
+  var AT = String.fromCharCode(64);
+  var css = document.createElement('style');
+  /* No Razor at-symbol in comments here! */
+  css.textContent =
+    '#sl-scene{position:fixed;inset:0;z-index:99990;pointer-events:none;perspective:1000px;overflow:hidden;}' +
+    '#sl-cam{position:absolute;inset:0;transform-style:preserve-3d;}' +
+    '#sl-darken{position:absolute;inset:0;background:radial-gradient(circle at center, #080a18 0%, #000 100%);opacity:0;}' +
+    
+    /* Glowing floor grid */
+    '#sl-grid{position:absolute;left:-50%;top:-50%;width:200%;height:200%;background-image:linear-gradient(rgba(0,229,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.2) 1px, transparent 1px);background-size:60px 60px;transform:rotateX(75deg) translateZ(-400px);opacity:0;}' +
+    
+    '#sl-slider{position:absolute;inset:0;transform-style:preserve-3d;}' +
+    '.sl-col{position:absolute;top:-10%;bottom:-10%;transform-style:preserve-3d;}' +
+    '.sl-face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid rgba(0,229,255,0.3);box-shadow:inset 0 0 30px rgba(0,229,255,0.1);}' +
+    
+    /* Glass front face */
+    '.sl-face.front{transform:rotateY(0deg) translateZ(4vw);background:rgba(10,12,24,0.65);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);}' +
+    /* Side faces (neon glow) */
+    '.sl-face.right{transform:rotateY(90deg) translateZ(4vw);background:linear-gradient(90deg, #00E5FF, #8B5CF6);}' +
+    '.sl-face.left{transform:rotateY(-90deg) translateZ(4vw);background:linear-gradient(-90deg, #00E5FF, #8B5CF6);}' +
+    '.sl-face.back{transform:rotateY(180deg) translateZ(4vw);background:#000;}' +
+    
+    /* Flare sweeping down the glass */
+    '.sl-flare{position:absolute;left:0;right:0;height:150px;background:linear-gradient(180deg,transparent,rgba(0,229,255,0.8),transparent);opacity:0;transform:translateY(-200px);}' +
+    
+    '#sl-hud{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translateZ(100px);z-index:99995;opacity:0;pointer-events:none;text-align:center;width:100%;}' +
+    '#sl-icon{color:#00E5FF;font-size:0px;filter:drop-shadow(0 0 30px #00E5FF);}' +
+    '#sl-text{font-family:Oswald,sans-serif;font-size:0px;color:#fff;letter-spacing:0px;text-shadow:0 0 20px #00E5FF, 0 0 40px #8B5CF6;margin-top:15px;}' +
+    
+    /* Cyber lines shooting out */
+    '.sl-line{position:absolute;background:#00E5FF;height:2px;width:0;top:50%;transform:translateY(-50%);box-shadow:0 0 10px #00E5FF;}' +
+    '.sl-line.left{right:65%;}' +
+    '.sl-line.right{left:65%;}' +
+    
+    '#sl-flood{position:fixed;inset:0;z-index:99999;background:#fff;opacity:0;pointer-events:none;}';
+  document.head.appendChild(css);
+
+  /* Build DOM */
+  var scene  = el('div','sl-scene');
+  var cam    = el('div','sl-cam');
+  var darken = el('div','sl-darken');
+  var grid   = el('div','sl-grid');
+  var slider = el('div','sl-slider');
+  
+  var hud    = el('div','sl-hud');
+  var icon   = el('div','sl-icon'); icon.innerHTML = '<i class="bi bi-fingerprint"></i>';
+  var text   = el('div','sl-text'); text.innerText = 'BIOMETRICS_VERIFIED';
+  var lLine  = el('div'); lLine.className = 'sl-line left';
+  var rLine  = el('div'); rLine.className = 'sl-line right';
+  
+  var flood  = el('div','sl-flood');
+
+  hud.appendChild(lLine);
+  hud.appendChild(icon);
+  hud.appendChild(text);
+  hud.appendChild(rLine);
+
+  var COLS = 12; // More columns for smoother glass slice effect
+  var cols = [];
+  var flares = [];
+  for(var i=0; i<COLS; i++){
+    var col = el('div');
+    col.className = 'sl-col';
+    col.style.left = (i * (100/COLS)) + '%';
+    col.style.width = (100/COLS) + '%';
+    
+    /* Alternate start positions: Top and Bottom */
+    col.style.transform = (i%2===0) ? 'translateY(120%)' : 'translateY(-120%)';
+    
+    var fFront = el('div'); fFront.className = 'sl-face front';
+    var fRight = el('div'); fRight.className = 'sl-face right';
+    var fBack  = el('div'); fBack.className  = 'sl-face back';
+    var fLeft  = el('div'); fLeft.className  = 'sl-face left';
+    
+    var flare = el('div'); flare.className = 'sl-flare';
+    fFront.appendChild(flare);
+    flares.push(flare);
+
+    col.appendChild(fFront);
+    col.appendChild(fRight);
+    col.appendChild(fBack);
+    col.appendChild(fLeft);
+    
+    slider.appendChild(col);
+    cols.push(col);
+  }
+
+  cam.appendChild(darken);
+  cam.appendChild(grid);
+  cam.appendChild(slider);
+  cam.appendChild(hud);
+  scene.appendChild(cam);
+  document.body.appendChild(scene);
+  document.body.appendChild(flood);
+
+  function el(tag,id){var e=document.createElement(tag);if(id)e.id=id;return e;}
+
+  /* Scramble text effect helper */
+  function scrambleText(element, finalStr, duration) {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?#\$%\&\*';
+    var steps = duration / 30;
+    var step = 0;
+    var iv = setInterval(function(){
+      var str = '';
+      for(var i=0; i<finalStr.length; i++){
+        if(i < (step/steps) * finalStr.length){
+          str += finalStr[i];
+        } else {
+          str += chars[Math.floor(Math.random() * chars.length)];
+        }
+      }
+      element.innerText = str;
+      step++;
+      if(step > steps){
+        clearInterval(iv);
+        element.innerText = finalStr;
+      }
+    }, 30);
+  }
+
+  function playSlider(done){
+    var card=document.getElementById('loginCard');
+    var gsapOk = typeof gsap !== 'undefined';
+    var animeOk= typeof anime !== 'undefined';
+
+    scene.style.pointerEvents='all';
+
+    if(gsapOk){
+      var tl = gsap.timeline();
+
+      /* 1. Camera starts moving forward, card gets sucked in */
+      tl.to(darken,{opacity:0.95,duration:0.4,ease:'power2.out'});
+      tl.to(grid,{opacity:0.4,duration:0.6}, '<');
+      
+      if(card){
+        tl.to(card,{
+          z:-1000, rotationY:180, rotationZ:15, opacity:0, filter:'blur(20px)',
+          duration:0.8, ease:'power4.inOut'
+        }, '<');
+      }
+
+      /* Grid warp effect */
+      tl.to(grid,{
+        y: 200, z: 200, duration:2, ease:'none'
+      }, 0);
+
+      /* 2. Glass columns slice in from top and bottom */
+      tl.to(cols,{
+        y:0,
+        duration:0.9,
+        stagger:{amount:0.5, from:'center'},
+        ease:'expo.out'
+      }, 0.3);
+
+      /* 3. Flare sweeps down the glass panels */
+      tl.to(flares,{
+        y:window.innerHeight + 200,
+        opacity:1,
+        duration:0.8,
+        stagger:{amount:0.3, from:'center'},
+        ease:'power2.inOut'
+      }, 0.6);
+      tl.to(flares,{opacity:0,duration:0.2,stagger:{amount:0.3, from:'center'}}, 1.0);
+
+      /* 4. HUD pops in with Cyber lines */
+      tl.to(hud,{opacity:1,duration:0.2}, 1.2);
+      
+      tl.call(function(){
+        if(animeOk){
+          anime({
+            targets: icon,
+            fontSize: ['0px','100px'],
+            opacity: [0,1],
+            easing: 'easeOutElastic(1, .5)',
+            duration: 1200
+          });
+          /* Lines shoot outward */
+          anime({
+            targets: [lLine, rLine],
+            width: ['0px', '30vw'],
+            opacity: [1, 0],
+            easing: 'easeOutExpo',
+            duration: 1000
+          });
+        }
+      }, [], 1.2);
+
+      tl.to(text,{
+        fontSize: '32px',
+        letterSpacing: '12px',
+        duration:0.1
+      }, 1.3);
+      
+      tl.call(function(){ scrambleText(text, 'ACCESS GRANTED', 600); }, [], 1.3);
+
+      /* 5. The Ultimate 3D Slider Rotation & Camera Zoom */
+      /* Entire camera zooms in while columns rotate */
+      tl.to(hud,{opacity:0, scale:2, duration:0.4, ease:'power3.in'}, 2.6);
+      
+      tl.to(cam,{
+        z: 800, /* Extreme zoom */
+        duration: 1.0,
+        ease: 'power4.inOut'
+      }, 2.6);
+
+      tl.to(cols,{
+        rotationY:90, /* Rotate to reveal the glowing side neon faces */
+        duration:0.9,
+        stagger:{amount:0.4, from:'center'},
+        ease:'power3.inOut'
+      }, 2.6);
+
+      /* 6. White flood */
+      tl.to(flood,{opacity:1,duration:0.3,ease:'power2.in'}, 3.3);
+      tl.call(done, [], 3.7);
+
+    } else {
+      setTimeout(done,1000);
+    }
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    var btn=form.querySelector('button[type="submit"]');
+    if(btn){
+      btn.disabled=true;
+      if(typeof anime!=='undefined'){
+        anime({
+          targets:btn,
+          scale:[1,0.85,1.15,0.95,1],
+          boxShadow:['0 0 10px rgba(0,229,255,.2)','0 0 120px rgba(0,229,255,1)','0 0 50px rgba(139,92,246,.8)'],
+          filter:['brightness(1)','brightness(1.5)','brightness(1)'],
+          duration:500, easing:'easeOutExpo'
+        });
+      }
+    }
+    setTimeout(function(){ playSlider(function(){ form.submit(); }); }, 300);
+  },true);
+
+})();
+</script>
+}
+

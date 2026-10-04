@@ -1,0 +1,26 @@
+@model Dictionary<string, string>
+@{
+    ViewData["Title"] = "System Settings";
+}
+<div class="card glassmorphism">
+    <div class="card-header border-0 bg-transparent pb-0">
+        <h3 class="text-neon-purple fw-bold"><i class="bi bi-gear me-2"></i>System Settings</h3>
+        <p class="text-light-50">Configure global application behavior</p>
+    </div>
+    <div class="card-body">
+        <form asp-action="Update" method="post">
+            <div class="row g-4">
+                @foreach (var kvp in Model)
+                {
+                    <div class="col-md-6">
+                        <label class="form-label text-neon-blue">@kvp.Key</label>
+                        <input type="text" name="settings[@kvp.Key]" value="@kvp.Value" class="form-control glass-input" />
+                    </div>
+                }
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-neon-purple"><i class="bi bi-save me-1"></i> Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Gym_memrship_Managment.Models.TrainerSlot>
+@{
+    ViewData["Title"] = "Book a Trainer";
+    Layout = "_Layout";
+}
+
+<div class="max-w-6xl mx-auto space-y-10 anime-container">
+    
+    <!-- Header -->
+    <div class="text-center py-6 anime-item opacity-0">
+        <div class="inline-flex items-center gap-3 bg-gym-blue/10 border border-gym-blue/30 rounded-full px-6 py-2 mb-4">
+            <i class="bi bi-calendar-event text-gym-blue text-sm"></i>
+            <span class="text-gym-blue text-xs font-bold uppercase tracking-widest">Personal Training</span>
+        </div>
+        <h1 class="text-5xl font-oswald font-bold text-white tracking-wide mb-3" style="text-shadow: 0 0 40px rgba(0,229,255,0.3)">
+            BOOK A <span class="gradient-text-blue">TRAINER</span>
+        </h1>
+        <p class="text-gym-gray text-lg max-w-xl mx-auto">Select an available slot below to schedule your personalized session with our expert trainers.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-20 anime-item opacity-0">
+            <i class="bi bi-calendar-x text-6xl text-gym-gray mb-4 block"></i>
+            <p class="text-gym-gray text-lg">No trainer slots are currently available. Please check back later!</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach(var slot in Model)
+            {
+                <div class="glass-card p-6 rounded-2xl border border-gym-blue/20 hover:border-gym-blue/50 transition-colors anime-item opacity-0 group">
+                    
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-12 h-12 rounded-xl bg-gym-blue/10 border border-gym-blue/30 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="bi bi-person-fill text-gym-blue text-xl"></i>
+                        </div>
+                        <div class="bg-white/5 border  px-3 py-1 rounded-full text-xs text-gym-gray uppercase tracking-widest">
+                            @slot.DayOfWeek
+                        </div>
+                    </div>
+
+                    <h4 class="text-2xl font-oswald text-white font-bold mb-1">@slot.Trainer.FullName</h4>
+                    <p class="text-gym-gray text-sm mb-6">
+                        <i class="bi bi-clock me-1"></i> @slot.StartTime.ToString("hh:mm tt") - @slot.EndTime.ToString("hh:mm tt")
+                    </p>
+
+                    <form method="post" action="/Booking/BookSlot">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="slotId" value="@slot.TrainerSlotId" />
+                        
+                        <div class="mb-4">
+                            <label class="block text-xs text-gym-gray uppercase tracking-wider mb-2">Select Date</label>
+                            <input type="date" name="date" class="w-full bg-black/50 border  rounded-xl px-4 py-3 text-white focus:border-gym-blue focus:ring-1 focus:ring-gym-blue outline-none transition-all" required />
+                        </div>
+
+                        <button type="submit" class="w-full btn-gradient-blue font-bold py-3 rounded-xl shadow-lg tracking-widest flex items-center justify-center gap-2">
+                            <i class="bi bi-calendar-plus"></i> BOOK SESSION
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Animate items on load
+    if (typeof anime !== 'undefined') {
+        anime({
+            targets: '.anime-item',
+            translateY: [30, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(150),
+            easing: 'easeOutExpo',
+            duration: 800
+        });
+    } else {
+        document.querySelectorAll('.anime-item').forEach(el => {
+            el.classList.remove('opacity-0');
+            el.style.opacity = '1';
+        });
+    }
+
+    // Restrict date inputs to future dates and match the DayOfWeek
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    if (dateInputs.length > 0) {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        // Format to YYYY-MM-DD for min attribute
+        const yyyy = tomorrow.getFullYear();
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const dd = String(tomorrow.getDate()).padStart(2, '0');
+        const minDate = yyyy + '-' + mm + '-' + dd;
+        
+        dateInputs.forEach(input => {
+            input.setAttribute('min', minDate);
+        });
+    }
+});
+</script>
+}
+

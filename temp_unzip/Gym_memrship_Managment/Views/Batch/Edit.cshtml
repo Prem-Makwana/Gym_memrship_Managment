@@ -1,0 +1,66 @@
+@model BatchCreateVm
+@{
+  ViewData["Title"] = "Edit Batch";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Edit Batch</h1></div>
+  <a href="/Batch" class="btn-outline-glass"><i class="bi bi-arrow-left"></i> Back</a>
+</div>
+
+<form asp-action="Edit" asp-controller="Batch" asp-route-id="@Context.Request.RouteValues["id"]" method="post" class="form-glass">
+  @Html.AntiForgeryToken()
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+    <div>
+      <label class="form-label-dark">Batch Name *</label>
+      <input asp-for="BatchName" class="form-control-dark" style="width:100%" required />
+    </div>
+    <div>
+      <label class="form-label-dark">Trainer</label>
+      <select asp-for="TrainerId" class="form-control-dark" style="width:100%">
+        <option value="">No Trainer</option>
+        @foreach (var t in Model.Trainers)
+        { <option value="@t.TrainerId">@t.FullName</option> }
+      </select>
+    </div>
+    <div style="grid-column:span 2">
+      <label class="form-label-dark">Description</label>
+      <textarea asp-for="Description" class="form-control-dark" style="width:100%;height:70px;resize:none"></textarea>
+    </div>
+    <div>
+      <label class="form-label-dark">Start Time</label>
+      <input asp-for="StartTime" type="time" class="form-control-dark" style="width:100%" />
+    </div>
+    <div>
+      <label class="form-label-dark">End Time</label>
+      <input asp-for="EndTime" type="time" class="form-control-dark" style="width:100%" />
+    </div>
+    <div>
+      <label class="form-label-dark">Maximum Capacity</label>
+      <input asp-for="MaximumCapacity" type="number" class="form-control-dark" style="width:100%" min="1" max="100" />
+    </div>
+    <div>
+      <label class="form-label-dark">Location</label>
+      <input asp-for="Location" class="form-control-dark" style="width:100%" />
+    </div>
+    <div style="grid-column:span 2">
+      <label class="form-label-dark">Schedule Days</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        @foreach (var day in Enum.GetValues<DayOfWeek>())
+        {
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:8px 12px">
+            <input type="checkbox" name="SelectedDays" value="@((int)day)"
+                   @(Model.SelectedDays.Contains(day) ? "checked" : "")
+                   style="width:14px;height:14px" />
+            <span style="font-size:13px;color:#9994AA">@day</span>
+          </label>
+        }
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:24px;justify-content:flex-end">
+    <a href="/Batch" class="btn-outline-glass">Cancel</a>
+    <button type="submit" class="btn-gradient-blue"><i class="bi bi-save"></i> Save Changes</button>
+  </div>
+</form>

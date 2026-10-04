@@ -1,0 +1,134 @@
+﻿@model Membership
+@{
+  ViewData["Title"] = "Membership Details";
+  Layout = "_Layout";
+  var status = (MembershipStatus)ViewBag.Status;
+  var bc = status == MembershipStatus.Active ? "badge-active"
+      : status == MembershipStatus.ExpiringSoon ? "badge-expiring"
+      : status == MembershipStatus.Expired ? "badge-expired"
+      : status == MembershipStatus.Suspended ? "badge-suspended"
+      : "badge-cancelled";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Membership #@Model.MembershipId</h1>
+    <p class="page-subtitle">@Model.Member?.FullName</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="/Membership/Renew/@Model.MembershipId" class="btn-gradient-blue"><i class="bi bi-arrow-repeat"></i> Renew</a>
+    @if (User.IsInRole("Admin"))
+    {
+      @if (status != MembershipStatus.Suspended)
+      {
+        <form method="post" action="/Membership/Suspend/@Model.MembershipId">
+          @Html.AntiForgeryToken()
+          <input type="hidden" name="reason" value="Admin suspended" />
+          <button type="submit" class="btn-outline-glass" style="color:#FFB347;border-color:rgba(255,179,71,0.3)" onclick="return confirm('Suspend this membership?')">
+            <i class="bi bi-pause-circle"></i> Suspend
+          </button>
+        </form>
+      }
+      @if (status == MembershipStatus.Suspended)
+      {
+        <form method="post" action="/Membership/Reactivate/@Model.MembershipId">
+          @Html.AntiForgeryToken()
+          <button type="submit" class="btn-outline-glass" style="color:#00FF88;border-color:rgba(0,255,136,0.3)">
+            <i class="bi bi-play-circle"></i> Reactivate
+          </button>
+        </form>
+      }
+    }
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:16px">
+  <div class="glass-card">
+    <h3 style="margin:0 0 16px;font-size:14px;font-weight:600;color:#9994AA;text-transform:uppercase;letter-spacing:0.8px">Status</h3>
+    <span class="badge-status @bc" style="font-size:13px;padding:6px 14px">@status</span>
+    <div style="margin-top:16px;display:grid;gap:10px">
+      <div><span style="color:#5c5875;font-size:12px">Plan</span><div style="font-weight:600">@Model.Plan?.PlanName</div></div>
+      <div><span style="color:#5c5875;font-size:12px">Duration</span><div>@Model.Plan?.DurationInDays days</div></div>
+      <div><span style="color:#5c5875;font-size:12px">Start Date</span><div>@Model.StartDate.ToString("MMM dd, yyyy")</div></div>
+      <div><span style="color:#5c5875;font-size:12px">End Date</span><div>@Model.EndDate.ToString("MMM dd, yyyy")</div></div>
+      <div><span style="color:#5c5875;font-size:12px">Days Remaining</span><div style="color:@(Model.DaysRemaining < 7 ? "#FFB347" : "#00FF88");font-weight:700">@Model.DaysRemaining days</div></div>
+      <div><span style="color:#5c5875;font-size:12px">Renewals</span><div>@Model.RenewalCount</div></div>
+    </div>
+    <hr style="border-color:rgba(255,255,255,0.07);margin:16px 0" />
+    <div style="display:grid;gap:8px;font-size:13px">
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:#9994AA">Base Amount</span>
+        <span>₹@Model.BaseAmount.ToString("N2")</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:#9994AA">Discount</span>
+        <span style="color:#FFB347">-₹@Model.Discount.ToString("N2")</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid rgba(255,255,255,0.08);padding-top:8px">
+        <span>Total</span>
+        <span style="color:#00FF88">₹@Model.FinalAmount.ToString("N2")</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:#9994AA">Paid</span>
+        <span style="color:#00FF88">₹@Model.PaidAmount.ToString("N2")</span>
+      </div>
+      @if (Model.DueAmount > 0)
+      {
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:#FF006E">Due</span>
+          <span style="color:#FF006E;font-weight:700">₹@Model.DueAmount.ToString("N2")</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <!-- Payments -->
+    <div class="glass-card">
+      <h3 style="margin:0 0 12px;font-size:14px;font-weight:600">Payments</h3>
+      @if (!Model.Payments.Any())
+      { <p style="color:#5c5875">No payments recorded</p> }
+      else
+      {
+        <table class="glass-table">
+          <thead><tr><th>Receipt</th><th>Date</th><th>Type</th><th>Method</th><th>Amount</th></tr></thead>
+          <tbody>
+            @foreach (var p in Model.Payments.OrderByDescending(p => p.PaymentDate))
+            {
+              <tr>
+                <td style="font-size:11px;font-family:monospace;color:#5c5875">@p.ReceiptNumber</td>
+                <td style="color:#9994AA;font-size:12px">@p.PaymentDate.ToString("MMM dd, yyyy")</td>
+                <td>@p.PaymentType</td>
+                <td style="color:#9994AA">@p.PaymentMethod</td>
+                <td style="color:#00FF88;font-weight:600">₹@p.Amount.ToString("N2")</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+    <!-- Fines -->
+    <div class="glass-card">
+      <h3 style="margin:0 0 12px;font-size:14px;font-weight:600">Fines</h3>
+      @if (!Model.Fines.Any())
+      { <p style="color:#5c5875">No fines</p> }
+      else
+      {
+        @foreach (var f in Model.Fines)
+        {
+          var fbc = f.Status == FineStatus.Pending ? "badge-pending" : f.Status == FineStatus.Paid ? "badge-paid" : "badge-inactive";
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+            <div>
+              <div style="font-size:13px">@f.Reason</div>
+              <div style="font-size:11px;color:#9994AA">@f.DateIssued.ToString("MMM dd, yyyy")</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700;color:#FFB347">₹@f.Amount.ToString("N2")</div>
+              <span class="badge-status @fbc" style="font-size:10px">@f.Status</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

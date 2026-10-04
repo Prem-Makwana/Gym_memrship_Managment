@@ -1,0 +1,56 @@
+﻿@model List<Notification>
+@{
+  ViewData["Title"] = "Notifications";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Notifications</h1></div>
+  <form method="post" action="/Notification/MarkAllRead">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn-outline-glass" style="font-size:12px">
+      <i class="bi bi-check-all"></i> Mark All Read
+    </button>
+  </form>
+</div>
+
+@if (!Model.Any())
+{
+  <div style="display:flex;align-items:center;justify-content:center;height:40vh;flex-direction:column;gap:16px">
+    <i class="bi bi-bell-slash" style="font-size:48px;color:#5c5875"></i>
+    <p style="color:#9994AA">No unread notifications</p>
+  </div>
+}
+else
+{
+  <div style="display:flex;flex-direction:column;gap:8px">
+    @foreach (var n in Model)
+    {
+      var iconClass = n.Type == NotificationType.Warning ? "bi-exclamation-triangle-fill" :
+                      n.Type == NotificationType.Success ? "bi-check-circle-fill" :
+                      n.Type == NotificationType.Danger ? "bi-x-circle-fill" :
+                      n.Type == NotificationType.Expiry ? "bi-clock-history" :
+                      n.Type == NotificationType.Payment ? "bi-cash-stack" :
+                      "bi-info-circle-fill";
+      var iconColor = n.Type == NotificationType.Warning || n.Type == NotificationType.Expiry ? "#FFB347" :
+                      n.Type == NotificationType.Success || n.Type == NotificationType.Payment ? "#00FF88" :
+                      n.Type == NotificationType.Danger ? "#FF006E" :
+                      "#00D4FF";
+
+      <div class="glass-card" style="padding:16px;display:flex;align-items:flex-start;gap:12px">
+        <i class="bi @iconClass" style="font-size:20px;color:@iconColor;flex-shrink:0;margin-top:2px"></i>
+        <div style="flex:1">
+          <div style="font-weight:600;margin-bottom:2px">@n.Title</div>
+          <div style="font-size:13px;color:#9994AA">@n.Message</div>
+          <div style="font-size:11px;color:#5c5875;margin-top:6px">@n.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</div>
+        </div>
+        <form method="post" action="/Notification/MarkRead/@n.NotificationId">
+          @Html.AntiForgeryToken()
+          <button type="submit" class="btn-outline-glass" style="padding:4px 10px;font-size:11px">
+            <i class="bi bi-check"></i>
+          </button>
+        </form>
+      </div>
+    }
+  </div>
+}

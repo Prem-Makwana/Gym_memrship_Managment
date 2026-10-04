@@ -1,0 +1,113 @@
+@model BatchMembersVm
+@{
+  ViewData["Title"] = Model.Batch.BatchName + " — Members";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">@Model.Batch.BatchName</h1>
+    <p class="page-subtitle">@Model.Batch.StartTime.ToString("hh:mm tt") — @Model.Batch.EndTime.ToString("hh:mm tt") @(Model.Batch.Trainer != null ? $"• {Model.Batch.Trainer.FullName}" : "")</p>
+  </div>
+  <a href="/Batch" class="btn-outline-glass"><i class="bi bi-arrow-left"></i> All Batches</a>
+</div>
+
+<!-- Occupancy Card -->
+<div class="glass-card" style="margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h3 style="margin:0;font-size:15px;font-weight:600">Occupancy</h3>
+    <span style="font-size:20px;font-weight:700;color:@(Model.OccupancyPercent >= 90 ? "#FF006E" : Model.OccupancyPercent >= 70 ? "#FFB347" : "#00FF88")">
+      @Model.Occupied / @Model.Capacity
+    </span>
+  </div>
+  <div class="progress-glass">
+    <div class="progress-bar-gradient @(Model.OccupancyPercent > 80 ? "progress-bar-danger" : "")"
+         style="width:@(Math.Min((int)Model.OccupancyPercent, 100))%"></div>
+  </div>
+  <div style="font-size:12px;color:#9994AA;margin-top:6px">@Model.OccupancyPercent.ToString("N0")% capacity filled — @(Model.Capacity - Model.Occupied) spots available</div>
+</div>
+
+<!-- Add Member to Batch -->
+@if (Model.Occupied < Model.Capacity)
+{
+  <div class="glass-card" style="margin-bottom:16px;padding:14px 20px">
+    <h3 style="margin:0 0 12px;font-size:14px;font-weight:600">Add Member to Batch</h3>
+    <div style="display:flex;gap:10px">
+      <div style="position:relative;flex:1">
+        <input type="text" id="add-member-search" class="form-control-dark" style="width:100%"
+               placeholder="Search member by name or ID..."
+               oninput="memberSearch(this.value, 'add-suggestions')" />
+        <div id="add-suggestions" class="glass-card d-none"
+             style="position:absolute;top:100%;left:0;right:0;z-index:100;padding:0;max-height:200px;overflow-y:auto"></div>
+      </div>
+      <input type="hidden" id="add-member-id" />
+      <form id="enroll-form" method="post" action="/Batch/EnrollMember">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="batchId" value="@Model.Batch.BatchId" />
+        <input type="hidden" name="memberId" id="enroll-member-id" />
+        <button type="submit" class="btn-gradient-blue" id="enroll-btn" disabled>
+          <i class="bi bi-person-plus"></i> Add to Batch
+        </button>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Members Table -->
+<div class="glass-card" style="padding:0;overflow:hidden">
+  <table class="glass-table">
+    <thead>
+      <tr><th>Member</th><th>Phone</th><th>Enrolled Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      @if (!Model.Enrollments.Any())
+      {
+        <tr><td colspan="4" style="text-align:center;padding:40px;color:#5c5875">No members enrolled in this batch</td></tr>
+      }
+      @foreach (var e in Model.Enrollments)
+      {
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="avatar">@e.Member?.FullName?.Substring(0,1)</div>
+              <div>
+                <div style="font-weight:500">@e.Member?.FullName</div>
+                <div style="font-size:11px;color:#5c5875">@e.Member?.MembershipNumber</div>
+              </div>
+            </div>
+          </td>
+          <td style="color:#9994AA">@e.Member?.Phone</td>
+          <td style="color:#9994AA;font-size:12px">@e.EnrolledDate.ToString("MMM dd, yyyy")</td>
+          <td>
+            <form method="post" action="/Batch/DropMember" style="display:inline">
+              @Html.AntiForgeryToken()
+              <input type="hidden" name="batchId" value="@Model.Batch.BatchId" />
+              <input type="hidden" name="memberId" value="@e.MemberId" />
+              <button type="submit" class="btn-outline-glass" style="font-size:12px;padding:4px 10px;color:#FF006E;border-color:rgba(255,0,110,0.3)"
+                      onclick="return confirm('Remove member from batch?')">
+                <i class="bi bi-person-dash"></i> Drop
+              </button>
+            </form>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@section Scripts {
+<script>
+  const addMemberId = document.getElementById('add-member-id');
+  const enrollMemberId = document.getElementById('enroll-member-id');
+  const enrollBtn = document.getElementById('enroll-btn');
+  const searchInput = document.getElementById('add-member-search');
+
+  function selectMember(id, name, number) {
+    addMemberId.value = id;
+    enrollMemberId.value = id;
+    searchInput.value = `${name} (${number})`;
+    document.getElementById('add-suggestions').classList.add('d-none');
+    enrollBtn.disabled = false;
+  }
+</script>
+}

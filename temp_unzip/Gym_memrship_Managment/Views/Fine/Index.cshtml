@@ -1,0 +1,83 @@
+@model List<Fine>
+@{
+  ViewData["Title"] = "Fines";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div><h1 class="page-title">Fines</h1></div>
+</div>
+
+<!-- Status Filter -->
+<div style="display:flex;gap:8px;margin-bottom:16px">
+  <a href="/Fine" class="btn-outline-glass" style="font-size:12px;@(ViewBag.StatusFilter == null ? "color:#00D4FF;border-color:rgba(0,212,255,0.3)" : "")">All</a>
+  @foreach (var s in Enum.GetValues<FineStatus>())
+  {
+    <a href="/Fine?status=@s" class="btn-outline-glass" style="font-size:12px;@(ViewBag.StatusFilter == s.ToString() ? "color:#00D4FF;border-color:rgba(0,212,255,0.3)" : "")">@s</a>
+  }
+</div>
+
+<div class="glass-card" style="padding:0;overflow:hidden">
+  <table class="glass-table">
+    <thead>
+      <tr><th>Member</th><th>Reason</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      @if (!Model.Any())
+      {
+        <tr><td colspan="6" style="text-align:center;padding:40px;color:#5c5875">No fines found</td></tr>
+      }
+      @foreach (var f in Model)
+      {
+        var bc = f.Status == FineStatus.Pending ? "badge-pending" : f.Status == FineStatus.Paid ? "badge-paid" : "badge-inactive";
+        <tr>
+          <td>
+            <div style="font-weight:500">@f.Member?.FullName</div>
+            <div style="font-size:11px;color:#5c5875">@f.Member?.MembershipNumber</div>
+          </td>
+          <td style="color:#9994AA;font-size:13px">@f.Reason</td>
+          <td style="color:#FFB347;font-weight:700">$@f.Amount.ToString("N2")</td>
+          <td style="color:#9994AA;font-size:12px">@f.DateIssued.ToString("MMM dd, yyyy")</td>
+          <td><span class="badge-status @bc">@f.Status</span></td>
+          <td>
+            @if (f.Status == FineStatus.Pending)
+            {
+              <div style="display:flex;gap:4px">
+                <form method="post" action="/Fine/Pay/@f.FineId">
+                  @Html.AntiForgeryToken()
+                  <button type="submit" class="btn-outline-glass" style="font-size:12px;padding:4px 10px;color:#00FF88;border-color:rgba(0,255,136,0.3)"
+                          onclick="return confirm('Mark fine as paid?')">
+                    <i class="bi bi-check-circle"></i> Pay
+                  </button>
+                </form>
+                @if (User.IsInRole("Admin"))
+                {
+                  <form method="post" action="/Fine/Waive/@f.FineId">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="notes" value="Admin waived" />
+                    <button type="submit" class="btn-outline-glass" style="font-size:12px;padding:4px 10px;color:#FFB347;border-color:rgba(255,179,71,0.3)"
+                            onclick="return confirm('Waive this fine?')">
+                      <i class="bi bi-x-circle"></i> Waive
+                    </button>
+                  </form>
+                }
+              </div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (ViewBag.TotalPages > 1)
+{
+  <div style="display:flex;justify-content:center;margin-top:16px">
+    <div class="pagination-glass">
+      @for (var i = 1; i <= (int)ViewBag.TotalPages; i++)
+      {
+        <a href="?status=@ViewBag.StatusFilter&page=@i" class="page-btn @(i == (int)ViewBag.CurrentPage ? "active" : "")">@i</a>
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,227 @@
+@model Gym_memrship_Managment.ViewModels.MemberDetailsVm
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_Layout";
+}
+
+<div class="max-w-6xl mx-auto space-y-8 anime-container">
+    <!-- Header Section -->
+    <div class="glass-card flex flex-col md:flex-row items-center justify-between p-8 rounded-2xl relative overflow-hidden border border-white/10 opacity-0 anime-item">
+        <div class="absolute inset-0 bg-gradient-to-r from-gym-blue/10 to-transparent pointer-events-none"></div>
+        <div class="flex items-center gap-6 relative z-10 mb-4 md:mb-0">
+            <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-gym-blue to-purple-600 flex items-center justify-center text-4xl font-bold shadow-[0_0_20px_rgba(0,229,255,0.4)]">
+                @Model.Member.FullName.Substring(0, 1).ToUpper()
+            </div>
+            <div>
+                <h1 class="text-4xl font-oswald font-bold tracking-wide mb-1">@Model.Member.FullName</h1>
+                <p class="text-gym-gray font-medium flex items-center gap-2 text-sm md:text-base">
+                    <i class="bi bi-person-badge text-gym-blue drop-shadow-[0_0_5px_rgba(0,229,255,0.8)]"></i> @Model.Member.MembershipNumber 
+                    <span class="text-white/20">|</span> 
+                    <i class="bi bi-calendar-check text-gym-green drop-shadow-[0_0_5px_rgba(57,255,20,0.8)]"></i> Joined @Model.Member.JoinDate.ToString("MMMM yyyy")
+                </p>
+            </div>
+        </div>
+        <div class="relative z-10 md:text-right">
+            @{ var statusColor = Model.Member.Status == Gym_memrship_Managment.Models.MemberStatus.Active ? "bg-gym-green/20 text-gym-green border-gym-green/50 shadow-[0_0_10px_rgba(57,255,20,0.3)]" : "bg-red-500/20 text-red-400 border-red-500/50 shadow-[0_0_10px_rgba(255,0,0,0.3)]"; }
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border @statusColor backdrop-blur-md font-semibold tracking-wider uppercase text-sm">
+                <div class="w-2 h-2 rounded-full @(Model.Member.Status == Gym_memrship_Managment.Models.MemberStatus.Active ? "bg-gym-green animate-pulse" : "bg-red-400")"></div>
+                @Model.Member.Status
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Personal Info -->
+        <div class="glass-card p-6 rounded-2xl border border-white/10 opacity-0 anime-item space-y-6">
+            <div class="flex items-center gap-3 border-b border-white/10 pb-4">
+                <i class="bi bi-person-vcard text-2xl text-gym-blue drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]"></i>
+                <h3 class="font-oswald text-xl uppercase tracking-widest text-white/90">Personal Details</h3>
+            </div>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center group">
+                    <span class="text-gym-gray text-sm uppercase tracking-wide">Email</span>
+                    <span class="font-medium text-white group-hover:text-gym-blue transition-colors">@Model.Member.Email</span>
+                </div>
+                <div class="flex justify-between items-center group">
+                    <span class="text-gym-gray text-sm uppercase tracking-wide">Phone</span>
+                    <span class="font-medium text-white group-hover:text-gym-blue transition-colors">@Model.Member.Phone</span>
+                </div>
+                @if (Model.Member.DateOfBirth.HasValue)
+                {
+                    <div class="flex justify-between items-center group">
+                        <span class="text-gym-gray text-sm uppercase tracking-wide">Age</span>
+                        <span class="font-medium text-white">@(DateTime.Today.Year - Model.Member.DateOfBirth.Value.Year) yrs</span>
+                    </div>
+                }
+                    <div class="flex justify-between items-center group">
+                        <span class="text-gym-gray text-sm uppercase tracking-wide">Gender</span>
+                        <span class="font-medium text-white">@Model.Member.Gender</span>
+                    </div>
+                @if (!string.IsNullOrEmpty(Model.Member.Address))
+                {
+                    <div class="flex justify-between items-center group">
+                        <span class="text-gym-gray text-sm uppercase tracking-wide">Address</span>
+                        <span class="font-medium text-white text-right max-w-[200px] truncate" title="@Model.Member.Address">@Model.Member.Address</span>
+                    </div>
+                }
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Member.EmergencyContactName))
+            {
+                <div class="pt-4 border-t border-white/10 space-y-3">
+                    <h4 class="text-xs text-gym-gray uppercase tracking-widest">Emergency Contact</h4>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <div class="font-medium text-gym-orange drop-shadow-[0_0_5px_rgba(255,77,0,0.8)]">@Model.Member.EmergencyContactName</div>
+                        <div class="text-sm text-gray-400">
+                            <i class="bi bi-telephone-fill text-xs mr-1"></i> @Model.Member.EmergencyContactPhone
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Membership & Activity -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Active Membership -->
+            <div class="glass-card p-6 rounded-2xl border border-gym-blue/30 shadow-[0_0_30px_rgba(0,229,255,0.1)] relative overflow-hidden opacity-0 anime-item">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gym-blue/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+                <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-6 relative z-10">
+                    <i class="bi bi-star-fill text-2xl text-gym-blue drop-shadow-[0_0_10px_rgba(0,229,255,0.8)]"></i>
+                    <h3 class="font-oswald text-xl uppercase tracking-widest text-white">Active Plan</h3>
+                </div>
+                
+                @if (Model.ActiveMembership != null)
+                {
+                    var m = Model.ActiveMembership;
+                    var status = m.ComputedStatus;
+                    var badgeCls = status == Gym_memrship_Managment.Models.MembershipStatus.Active ? "bg-gym-green/20 text-gym-green border-gym-green/50 shadow-[0_0_8px_rgba(57,255,20,0.4)]" : status == Gym_memrship_Managment.Models.MembershipStatus.ExpiringSoon ? "bg-gym-orange/20 text-gym-orange border-gym-orange/50 shadow-[0_0_8px_rgba(255,77,0,0.4)]" : "bg-red-500/20 text-red-400 border-red-500/50 shadow-[0_0_8px_rgba(255,0,0,0.4)]";
+                    var progress = Math.Min(100, (int)(m.DaysRemaining * 100.0 / Math.Max(1, m.Plan?.DurationInDays ?? 30)));
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                        <div>
+                            <div class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 mb-1">
+                                @m.Plan?.PlanName
+                            </div>
+                            <div class="text-gym-gray text-sm mb-4">
+                                <i class="bi bi-calendar-range"></i> @m.StartDate.ToString("MMM dd, yyyy") - @m.EndDate.ToString("MMM dd, yyyy")
+                            </div>
+                            <span class="inline-block px-3 py-1 rounded-md border @badgeCls text-xs font-bold uppercase tracking-wider">
+                                @status - @m.DaysRemaining Days Left
+                            </span>
+                        </div>
+                        <div class="flex flex-col justify-center space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs text-gym-gray uppercase tracking-widest mb-2">
+                                    <span>Plan Progress</span>
+                                    <span>@progress%</span>
+                                </div>
+                                <div class="h-2 w-full bg-black/50 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-gym-blue to-gym-green rounded-full shadow-[0_0_10px_rgba(0,229,255,0.5)]" style="width: @progress%"></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gym-gray">Amount Paid</span>
+                                <span class="font-bold text-gym-green drop-shadow-[0_0_5px_rgba(57,255,20,0.5)]">$@m.PaidAmount.ToString("N2")</span>
+                            </div>
+                            @if (m.DueAmount > 0)
+                            {
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gym-gray">Amount Due</span>
+                                    <span class="font-bold text-gym-red drop-shadow-[0_0_5px_rgba(255,0,60,0.5)]">$@m.DueAmount.ToString("N2")</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-8 relative z-10">
+                        <i class="bi bi-shield-x text-5xl text-gym-gray/50 mb-3 block"></i>
+                        <h4 class="text-lg font-medium text-white/80">No Active Membership</h4>
+                        <p class="text-gym-gray text-sm mt-1">Contact the front desk to enroll in a new plan.</p>
+                    </div>
+                }
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Current Batch -->
+                <div class="glass-card p-6 rounded-2xl border border-white/10 opacity-0 anime-item">
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+                        <i class="bi bi-clock-history text-xl text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></i>
+                        <h3 class="font-oswald text-lg uppercase tracking-widest text-white/90">My Batch</h3>
+                    </div>
+                    @if (Model.CurrentBatch != null)
+                    {
+                        <div class="space-y-3">
+                            <div class="font-medium text-lg text-white">@Model.CurrentBatch.Batch?.BatchName</div>
+                            <div class="flex items-center gap-2 text-gym-gray">
+                                <i class="bi bi-alarm"></i> 
+                                @Model.CurrentBatch.Batch?.StartTime.ToString("hh:mm tt") - @Model.CurrentBatch.Batch?.EndTime.ToString("hh:mm tt")
+                            </div>
+                            @if (Model.CurrentBatch.Batch?.Trainer != null)
+                            {
+                                <div class="flex items-center gap-2 text-gym-gray mt-2 pt-2 border-t border-white/5">
+                                    <i class="bi bi-person-badge text-gym-blue"></i>
+                                    Trainer: <span class="text-white/80">@Model.CurrentBatch.Batch.Trainer.FullName</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-gym-gray text-sm py-4 text-center">Not assigned to any batch.</p>
+                    }
+                </div>
+
+                <!-- Recent Attendance -->
+                <div class="glass-card p-6 rounded-2xl border border-white/10 opacity-0 anime-item">
+                    <div class="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
+                        <i class="bi bi-check2-circle text-xl text-gym-green drop-shadow-[0_0_8px_rgba(57,255,20,0.8)]"></i>
+                        <h3 class="font-oswald text-lg uppercase tracking-widest text-white/90">Recent Visits</h3>
+                    </div>
+                    @if (Model.RecentAttendance.Any())
+                    {
+                        <div class="space-y-3">
+                            @foreach (var a in Model.RecentAttendance.Take(3))
+                            {
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-transparent hover:border-white/10">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-medium">@a.Date.ToString("MMM dd")</span>
+                                        <span class="text-xs text-gym-gray">@a.CheckInTime.ToString("hh:mm tt")</span>
+                                    </div>
+                                    @if (a.CheckOutTime.HasValue)
+                                    {
+                                        <div class="text-xs bg-gym-blue/20 text-gym-blue px-2 py-1 rounded shadow-[0_0_5px_rgba(0,229,255,0.2)]">
+                                            @a.DurationMinutes min
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-gym-gray text-sm py-4 text-center">No recent visits found.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: '.anime-item',
+                    translateY: [20, 0],
+                    opacity: [0, 1],
+                    delay: anime.stagger(150),
+                    duration: 800,
+                    easing: 'easeOutExpo'
+                });
+            }
+        });
+    </script>
+}

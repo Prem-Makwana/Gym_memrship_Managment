@@ -1,0 +1,135 @@
+﻿@model Gym_memrship_Managment.Models.Membership?
+@{
+    ViewData["Title"] = "Payment Successful";
+    Layout = "_Layout";
+    var member = ViewBag.Member as Gym_memrship_Managment.Models.MemberProfile;
+    var amountPaid = (decimal)ViewBag.AmountPaid;
+    var paymentType = ViewBag.Type?.ToString() == "renewal" ? "Membership Renewed" : "Membership Activated";
+}
+
+<div class="max-w-2xl mx-auto text-center py-10 anime-container">
+
+    <!-- Animated Success Icon -->
+    <div id="success-icon" class="w-32 h-32 mx-auto mb-8 rounded-full bg-gym-green/10 border-2 border-gym-green/50 flex items-center justify-center opacity-0 anime-item" 
+         style="box-shadow: 0 0 60px rgba(0,255₹02,0.2)">
+        <i class="bi bi-check-lg text-gym-green text-6xl"></i>
+    </div>
+
+    <!-- Title -->
+    <div class="anime-item opacity-0 mb-6">
+        <h1 class="text-5xl font-oswald font-bold text-white tracking-wide mb-3">
+            PAYMENT <span style="color:#00FF66;text-shadow:0 0 20px rgba(0,255₹02,0.5)">SUCCESSFUL!</span>
+        </h1>
+        <p class="text-gym-gray text-lg">Your @paymentType is now live. Welcome to the gym!</p>
+    </div>
+
+    <!-- Receipt Card -->
+    <div class="glass-card text-left mb-8 anime-item opacity-0 border border-gym-green/20">
+        <h3 class="text-xs text-gym-gray uppercase tracking-widest mb-6 font-bold border-b  pb-3">Payment Receipt</h3>
+        
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-gym-gray text-sm">Member</span>
+                <span class="text-white font-semibold">@member?.FullName</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gym-gray text-sm">Member ID</span>
+                <span class="text-white font-mono text-sm">@member?.MembershipNumber</span>
+            </div>
+            @if (Model != null)
+            {
+                <div class="flex justify-between items-center">
+                    <span class="text-gym-gray text-sm">Plan</span>
+                    <span class="text-white font-semibold">@Model.Plan?.PlanName</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gym-gray text-sm">Valid From</span>
+                    <span class="text-white font-semibold">@Model.StartDate.ToString("MMM dd, yyyy")</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gym-gray text-sm">Valid Until</span>
+                    <span class="text-gym-green font-bold">@Model.EndDate.ToString("MMM dd, yyyy")</span>
+                </div>
+            }
+            <div class="flex justify-between items-center border-t  pt-4 mt-4">
+                <span class="text-gym-gray text-sm font-bold uppercase tracking-wide">Amount Paid</span>
+                <span class="text-3xl font-oswald font-bold text-gym-green" style="text-shadow:0 0 15px rgba(0,255₹02,0.4)">₹@amountPaid.ToString("N2")</span>
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-4 border-t  flex items-center gap-2 text-xs text-gym-gray">
+            <i class="bi bi-shield-check-fill text-gym-green"></i>
+            <span>Payment processed securely via Stripe. No card data stored on our servers.</span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center anime-item opacity-0">
+        <a href="/Dashboard/Member" class="btn-gradient-blue px-8 py-4 rounded-xl font-bold tracking-widest text-sm">
+            <i class="bi bi-house-fill me-2"></i> GO TO DASHBOARD
+        </a>
+        <a href="/Attendance/QrScanner" class="btn-outline-glass px-8 py-4 rounded-xl font-bold tracking-widest text-sm">
+            <i class="bi bi-qr-code-scan me-2"></i> VIEW MY QR CODE
+        </a>
+    </div>
+
+    <!-- Confetti particles using anime.js -->
+    <div id="confetti-container" class="fixed inset-0 pointer-events-none overflow-hidden z-50"></div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Stagger animate items in
+    anime({
+        targets: '.anime-item',
+        opacity: [0, 1],
+        translateY: [30, 0],
+        delay: anime.stagger(150, { start: 200 }),
+        duration: 700,
+        easing: 'easeOutExpo'
+    });
+
+    // Pulse the success icon
+    anime({
+        targets: '#success-icon',
+        scale: [0.3, 1.1, 1],
+        opacity: [0, 1],
+        duration: 900,
+        easing: 'easeOutElastic(1, .6)',
+        delay: 100
+    });
+
+    // Fire confetti particles
+    const container = document.getElementById('confetti-container');
+    const colors = ['#FFD700', '#00FF66', '#E50000', '#FFA500', '#FF0000'];
+    for (let i = 0; i < 60; i++) {
+        const dot = document.createElement('div');
+        dot.style.cssText = `
+            position:absolute;
+            width:${Math.random() * 8 + 4}px;
+            height:${Math.random() * 8 + 4}px;
+            background:${colors[Math.floor(Math.random() * colors.length)]};
+            border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+            left:${Math.random() * 100}vw;
+            top:-20px;
+            opacity:0.9;
+        `;
+        container.appendChild(dot);
+
+        anime({
+            targets: dot,
+            top: `${Math.random() * 100 + 60}vh`,
+            left: `${parseFloat(dot.style.left) + (Math.random() - 0.5) * 20}vw`,
+            rotate: Math.random() * 720,
+            opacity: [1, 0],
+            duration: Math.random() * 2000 + 1500,
+            delay: Math.random() * 800,
+            easing: 'easeInQuad',
+        });
+    }
+});
+</script>
+}
+
+

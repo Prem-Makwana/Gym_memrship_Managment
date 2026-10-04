@@ -1,0 +1,123 @@
+@{
+  ViewData["Title"] = "Reports";
+  Layout = "_Layout";
+}
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Reports</h1>
+    <p class="page-subtitle">Generate and export gym data reports</p>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+
+  <!-- Member Report -->
+  <div class="glass-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(0,212,255,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;color:#00D4FF">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:15px">Members Report</div>
+        <div style="font-size:12px;color:#9994AA">All member profiles & status</div>
+      </div>
+    </div>
+    <form method="get" action="/Report/Members" style="display:grid;gap:10px">
+      <div><label class="form-label-dark">From</label><input type="date" name="from" class="form-control-dark" style="width:100%" /></div>
+      <div><label class="form-label-dark">To</label><input type="date" name="to" class="form-control-dark" style="width:100%" /></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="submit" class="btn-gradient-blue" style="flex:1">View</button>
+        <button type="submit" name="export" value="true" class="btn-outline-glass" style="flex:1">
+          <i class="bi bi-download"></i> CSV
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Payment Report -->
+  <div class="glass-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(0,255,136,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;color:#00FF88">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:15px">Payments Report</div>
+        <div style="font-size:12px;color:#9994AA">Revenue & payment history</div>
+      </div>
+    </div>
+    <form method="get" action="/Report/Payments" style="display:grid;gap:10px">
+      <div><label class="form-label-dark">From</label><input type="date" name="from" class="form-control-dark" style="width:100%" /></div>
+      <div><label class="form-label-dark">To</label><input type="date" name="to" class="form-control-dark" style="width:100%" /></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="submit" class="btn-gradient-blue" style="flex:1">View</button>
+        <button type="submit" name="export" value="true" class="btn-outline-glass" style="flex:1"><i class="bi bi-download"></i> CSV</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Attendance Report -->
+  <div class="glass-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;color:#8B5CF6">
+        <i class="bi bi-qr-code-scan"></i>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:15px">Attendance Report</div>
+        <div style="font-size:12px;color:#9994AA">Check-in/out history</div>
+      </div>
+    </div>
+    <form method="get" action="/Report/Attendance" style="display:grid;gap:10px">
+      <div><label class="form-label-dark">From</label><input type="date" name="from" class="form-control-dark" style="width:100%" /></div>
+      <div><label class="form-label-dark">To</label><input type="date" name="to" class="form-control-dark" style="width:100%" /></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="submit" class="btn-gradient-blue" style="flex:1">View</button>
+        <button type="submit" name="export" value="true" class="btn-outline-glass" style="flex:1"><i class="bi bi-download"></i> CSV</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Expiring Memberships -->
+  <div class="glass-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,179,71,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;color:#FFB347">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:15px">Expiring Memberships</div>
+        <div style="font-size:12px;color:#9994AA">Members due for renewal</div>
+      </div>
+    </div>
+    <form method="get" action="/Report/Expiring" style="display:grid;gap:10px">
+      <div>
+        <label class="form-label-dark">Expiring Within (Days)</label>
+        <input type="number" name="days" value="30" class="form-control-dark" style="width:100%" min="1" max="365" />
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="submit" class="btn-gradient-blue" style="flex:1">View</button>
+        <button type="submit" name="export" value="true" class="btn-outline-glass" style="flex:1"><i class="bi bi-download"></i> CSV</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Fines Report -->
+  <div class="glass-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,0,110,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;color:#FF006E">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div>
+        <div style="font-weight:600;font-size:15px">Fines Report</div>
+        <div style="font-size:12px;color:#9994AA">All fines and collection</div>
+      </div>
+    </div>
+    <form method="get" action="/Report/Fines" style="display:grid;gap:10px">
+      <div><label class="form-label-dark">From</label><input type="date" name="from" class="form-control-dark" style="width:100%" /></div>
+      <div><label class="form-label-dark">To</label><input type="date" name="to" class="form-control-dark" style="width:100%" /></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="submit" class="btn-gradient-blue" style="flex:1">View</button>
+        <button type="submit" name="export" value="true" class="btn-outline-glass" style="flex:1"><i class="bi bi-download"></i> CSV</button>
+      </div>
+    </form>
+  </div>
+</div>
